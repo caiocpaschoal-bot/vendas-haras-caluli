@@ -248,6 +248,8 @@
   .btn:hover{background:var(--couro-escuro);}
   .btn.outline{background:transparent;border:1px solid var(--areia);color:var(--areia);}
   .btn.outline:hover{background:rgba(242,233,216,0.1);}
+  .btn.indique{background:var(--dourado);border:1px solid var(--dourado);color:var(--tinta);font-weight:600;}
+  .btn.indique:hover{background:var(--dourado-claro);border-color:var(--dourado-claro);}
   .btn:focus-visible{outline:2px solid var(--dourado);outline-offset:3px;}
 
   /* ---------- FENCE DIVIDER ---------- */
@@ -518,6 +520,9 @@
         <button class="btn outline" onclick="irParaContato('${item.nome.replace(/'/g,"")}', '${tipoLabel}')" style="margin-top:6px;justify-content:center;">
           Tenho interesse
         </button>
+        <button class="btn indique" onclick="indicarCliente('${item.nome.replace(/'/g,"")}', '${tipoLabel}')" style="margin-top:8px;justify-content:center;">
+          Indique e ganhe 10%
+        </button>
       </div>
     </article>`;
   }
@@ -624,6 +629,12 @@
 
   window.irParaContato = function(nome, tipo){
     const texto = `Olá, Haras Calúli! Tenho interesse em: ${nome} (${tipo}). Podem me passar mais informações?`;
+    const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
+    window.open(url, "_blank");
+  };
+
+  window.indicarCliente = function(nome, tipo){
+    const texto = `Olá, Haras Calúli! Tenho um cliente para esse lote: ${nome} (${tipo}). Como funciona a indicação?`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
     window.open(url, "_blank");
   };
