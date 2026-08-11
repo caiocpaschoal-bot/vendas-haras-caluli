@@ -194,9 +194,12 @@
   .grid.carrossel::-webkit-scrollbar{height:6px;}
   .grid.carrossel::-webkit-scrollbar-thumb{background:var(--dourado);border-radius:3px;}
   .grid.carrossel::-webkit-scrollbar-track{background:transparent;}
-  .grid.carrossel .card{flex:0 0 82%;max-width:320px;scroll-snap-align:start;}
+  .grid.carrossel .card{flex:0 0 80%;max-width:340px;scroll-snap-align:start;}
   @media (min-width:640px){
-    .grid.carrossel .card{flex:0 0 320px;}
+    .grid.carrossel .card{flex:0 0 46%;max-width:360px;}
+  }
+  @media (min-width:1000px){
+    .grid.carrossel .card{flex:0 0 30%;max-width:340px;}
   }
   .carrossel-arrow{
     position:absolute;top:calc(50% - 20px);transform:translateY(-50%);
