@@ -181,6 +181,39 @@
 
   /* ---------- CARDS ---------- */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:26px;}
+
+  /* ---------- CARROSSEL (rolagem horizontal) ---------- */
+  .carrossel-wrap{position:relative;}
+  .grid.carrossel{
+    display:flex;flex-wrap:nowrap;gap:20px;
+    overflow-x:auto;scroll-snap-type:x mandatory;
+    padding:4px 4px 14px;margin:-4px -4px 0;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;scrollbar-color:var(--dourado) transparent;
+  }
+  .grid.carrossel::-webkit-scrollbar{height:6px;}
+  .grid.carrossel::-webkit-scrollbar-thumb{background:var(--dourado);border-radius:3px;}
+  .grid.carrossel::-webkit-scrollbar-track{background:transparent;}
+  .grid.carrossel .card{flex:0 0 82%;max-width:320px;scroll-snap-align:start;}
+  @media (min-width:640px){
+    .grid.carrossel .card{flex:0 0 320px;}
+  }
+  .carrossel-arrow{
+    position:absolute;top:calc(50% - 20px);transform:translateY(-50%);
+    width:40px;height:40px;border-radius:50%;border:1px solid var(--linha);
+    background:var(--areia-clara);color:var(--couro-escuro);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 4px 14px rgba(74,25,23,0.18);z-index:5;font-size:1.1rem;
+    transition:background .2s;
+  }
+  .carrossel-arrow:hover{background:var(--areia);}
+  .block.dark .carrossel-arrow{background:rgba(242,233,216,0.14);color:var(--areia);border-color:rgba(242,233,216,0.25);}
+  .block.dark .carrossel-arrow:hover{background:rgba(242,233,216,0.24);}
+  .carrossel-arrow.prev{left:-8px;}
+  .carrossel-arrow.next{right:-8px;}
+  @media (max-width:640px){
+    .carrossel-arrow{display:none;}
+  }
   .card{
     background:var(--areia-clara);border:1px solid var(--linha);border-radius:4px;
     overflow:hidden;display:flex;flex-direction:column;
@@ -412,7 +445,11 @@
       </div>
       <p class="count" id="animais-count-label"></p>
     </div>
-    <div class="grid" id="grid-animais"></div>
+    <div class="carrossel-wrap">
+      <button class="carrossel-arrow prev" onclick="rolarCarrossel('grid-animais', -1)" aria-label="Ver anteriores">‹</button>
+      <div class="grid carrossel" id="grid-animais"></div>
+      <button class="carrossel-arrow next" onclick="rolarCarrossel('grid-animais', 1)" aria-label="Ver próximos">›</button>
+    </div>
   </div>
 </section>
 
@@ -729,6 +766,14 @@
     media.dataset.idx = i;
     media.querySelector(".carousel-track").style.transform = `translateX(-${i * 100}%)`;
     media.querySelectorAll(".carousel-dot").forEach((d, idx) => d.classList.toggle("ativo", idx === i));
+  };
+
+  window.rolarCarrossel = function(id, direcao){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const card = el.querySelector(".card");
+    const largura = card ? card.getBoundingClientRect().width + 20 : 300;
+    el.scrollBy({ left: direcao * largura, behavior: "smooth" });
   };
 
   document.getElementById("contato-form").addEventListener("submit", function(e){
