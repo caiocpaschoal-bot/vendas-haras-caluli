@@ -110,18 +110,20 @@
     display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
     border-top:1px solid rgba(242,233,216,0.22);
     margin-top:36px;
+    position:relative;z-index:2;
+    background:rgba(15,10,7,0.22);
+    border-radius:6px;
+    padding:0 4px;
   }
   .hero-index a{
     display:flex;justify-content:space-between;align-items:baseline;
-    padding:16px 18px 16px 0;text-decoration:none;color:var(--areia);
+    padding:18px 18px 18px 10px;text-decoration:none;color:var(--areia);
     border-right:1px solid rgba(242,233,216,0.22);
-    font-family:'Fraunces',serif;font-size:1.02rem;
+    font-family:'Fraunces',serif;font-size:1.05rem;font-weight:500;
   }
   .hero-index a:last-child{border-right:none;}
-  .hero-index a .n{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--dourado);}
+  .hero-index a .n{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--dourado-claro);font-weight:600;}
   .hero-index a:hover{color:var(--dourado);}
-  .horse-mark{position:absolute;right:-40px;bottom:-30px;width:340px;opacity:0.10;z-index:1;}
-
   /* ---------- SECTION SHELL ---------- */
   section.block{padding:80px 28px;}
   .block.light{background:var(--areia-clara);}
@@ -416,10 +418,7 @@
       <a href="#embrioes"><span>Embriões</span><span class="n" id="count-embrioes">00</span></a>
     </div>
   </div>
-  <svg class="horse-mark" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M40 170c10-40 5-55 5-75 0-28 22-45 48-45s45 20 48 42c3 22 12 40 20 78" stroke="#F2E9D8" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="93" cy="46" r="10" stroke="#F2E9D8" stroke-width="3"/>
-  </svg></section>
+</section>
 
 <!-- ===================== HISTÓRIA ===================== -->
 <section class="block paper" id="historia">
