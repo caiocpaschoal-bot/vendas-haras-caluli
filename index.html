@@ -193,6 +193,34 @@
     display:flex;align-items:center;justify-content:center;
   }
   .card-media svg{width:64px;height:64px;color:rgba(242,233,216,0.85);}
+  .card-media.tem-fotos{padding:0;overflow:hidden;}
+  .carousel-track{
+    display:flex;height:100%;width:100%;
+    transition:transform .35s ease;
+  }
+  .carousel-track img{
+    width:100%;height:100%;flex:0 0 100%;object-fit:cover;display:block;
+  }
+  .carousel-btn{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:30px;height:30px;border-radius:50%;border:none;
+    background:rgba(36,28,19,0.55);color:var(--areia);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:1.1rem;line-height:1;
+    transition:background .2s;
+  }
+  .carousel-btn:hover{background:rgba(36,28,19,0.8);}
+  .carousel-btn.prev{left:8px;}
+  .carousel-btn.next{right:8px;}
+  .carousel-dots{
+    position:absolute;bottom:10px;left:0;right:0;
+    display:flex;justify-content:center;gap:6px;
+  }
+  .carousel-dot{
+    width:7px;height:7px;border-radius:50%;border:none;padding:0;
+    background:rgba(242,233,216,0.5);cursor:pointer;
+  }
+  .carousel-dot.ativo{background:var(--dourado);}
   .selo{
     position:absolute;top:12px;right:12px;
     width:60px;height:60px;border-radius:50%;
@@ -497,6 +525,29 @@
 
   const iconHorse = `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 52c3-13 1-18 1-25 0-9 7-14 14-14s13.5 6 14 12c1 7 4 12 6 27"/><circle cx="41" cy="18" r="3.4"/></svg>`;
 
+  function mediaHTML(item){
+    const fotos = (item.fotos || "")
+      .split(",")
+      .map(f => f.trim())
+      .filter(f => f.length > 0);
+
+    if(fotos.length === 0){
+      return `<div class="card-media">${iconHorse}</div>`;
+    }
+    if(fotos.length === 1){
+      return `<div class="card-media tem-fotos"><img src="${fotos[0]}" alt="${item.nome}" loading="lazy"></div>`;
+    }
+    const slides = fotos.map(f => `<img src="${f}" alt="${item.nome}" loading="lazy">`).join("");
+    const dots = fotos.map((_, i) => `<button class="carousel-dot${i===0 ? " ativo" : ""}" onclick="irParaFoto(this, ${i})" aria-label="Foto ${i+1}"></button>`).join("");
+    return `
+      <div class="card-media tem-fotos" data-idx="0">
+        <div class="carousel-track">${slides}</div>
+        <button class="carousel-btn prev" onclick="moverCarrossel(this, -1)" aria-label="Foto anterior">‹</button>
+        <button class="carousel-btn next" onclick="moverCarrossel(this, 1)" aria-label="Próxima foto">›</button>
+        <div class="carousel-dots">${dots}</div>
+      </div>`;
+  }
+
   function cardHTML(item, tipoLabel){
     const linhagem = (item.pai || item.mae || item.nascimento) ? `
         <div class="linhagem">
@@ -506,9 +557,7 @@
         </div>` : "";
     return `
     <article class="card reveal">
-      <div class="card-media">
-        ${iconHorse}
-      </div>
+      ${mediaHTML(item)}
       <div class="card-body">
         <h3>${item.nome}</h3>
         <p class="tipo-tag">${tipoLabel}</p>
@@ -572,6 +621,7 @@
     if(h.startsWith("nasc")) return "nascimento";
     if(h.startsWith("valor")) return "valor";
     if(h.startsWith("observ")) return "obs";
+    if(h.startsWith("foto")) return "fotos";
     return h; // mantém como veio, caso seja uma coluna extra não usada
   }
 
@@ -594,7 +644,8 @@
             mae: l.mae,
             nascimento: l.nascimento,
             valor: l.valor,
-            obs: l.obs
+            obs: l.obs,
+            fotos: l.fotos
           }))
           .filter(l => l.nome && l.tipo);
         if(linhas.length === 0){
@@ -637,6 +688,24 @@
     const texto = `Olá, Haras Calúli! Tenho um cliente para esse lote: ${nome} (${tipo}). Como funciona a indicação?`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
     window.open(url, "_blank");
+  };
+
+  window.moverCarrossel = function(btn, direcao){
+    const media = btn.closest(".card-media");
+    const track = media.querySelector(".carousel-track");
+    const total = track.children.length;
+    let idx = parseInt(media.dataset.idx || "0", 10);
+    idx = (idx + direcao + total) % total;
+    media.dataset.idx = idx;
+    track.style.transform = `translateX(-${idx * 100}%)`;
+    media.querySelectorAll(".carousel-dot").forEach((d, i) => d.classList.toggle("ativo", i === idx));
+  };
+
+  window.irParaFoto = function(dot, i){
+    const media = dot.closest(".card-media");
+    media.dataset.idx = i;
+    media.querySelector(".carousel-track").style.transform = `translateX(-${i * 100}%)`;
+    media.querySelectorAll(".carousel-dot").forEach((d, idx) => d.classList.toggle("ativo", idx === i));
   };
 
   document.getElementById("contato-form").addEventListener("submit", function(e){
