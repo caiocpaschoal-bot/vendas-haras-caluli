@@ -525,10 +525,28 @@
 
   const iconHorse = `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 52c3-13 1-18 1-25 0-9 7-14 14-14s13.5 6 14 12c1 7 4 12 6 27"/><circle cx="41" cy="18" r="3.4"/></svg>`;
 
+  // Converte um link do Google Drive (visualização normal) em um link direto de imagem.
+  // Aceita também links já prontos (Imgur etc.) e devolve sem alterar.
+  function converterLinkFoto(url){
+    url = url.trim();
+    const padroesDrive = [
+      /drive\.google\.com\/file\/d\/([^/]+)/,      // .../file/d/ID/view
+      /drive\.google\.com\/open\?id=([^&]+)/,       // .../open?id=ID
+      /drive\.google\.com\/uc\?id=([^&]+)/          // .../uc?id=ID
+    ];
+    for(const padrao of padroesDrive){
+      const m = url.match(padrao);
+      if(m && m[1]){
+        return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000`;
+      }
+    }
+    return url;
+  }
+
   function mediaHTML(item){
     const fotos = (item.fotos || "")
-      .split(",")
-      .map(f => f.trim())
+      .split(/[,;]/)
+      .map(f => converterLinkFoto(f))
       .filter(f => f.length > 0);
 
     if(fotos.length === 0){
