@@ -55,22 +55,27 @@
     border-bottom:1px solid rgba(149,122,15,0.3);
   }
   .header-inner{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 28px;max-width:1120px;margin:0 auto;
+    display:flex;flex-direction:column;align-items:center;gap:12px;
+    padding:16px 20px;max-width:1120px;margin:0 auto;
   }
   .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--areia);}
-  .brand-icon{height:44px;width:auto;flex-shrink:0;display:block;}
+  .brand-icon{height:64px;width:auto;flex-shrink:0;display:block;}
   .brand-name{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--areia);}
   .brand-sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.14em;color:var(--dourado);text-transform:uppercase;}
-  nav{display:flex;gap:26px;flex-wrap:wrap;}
+  nav{display:flex;justify-content:center;align-items:center;gap:18px;row-gap:8px;flex-wrap:wrap;width:100%;}
   nav a{
-    color:var(--areia);opacity:0.82;text-decoration:none;font-size:0.88rem;
+    color:var(--areia);opacity:0.82;text-decoration:none;font-size:0.86rem;white-space:nowrap;
     font-family:'Inter',sans-serif;font-weight:500;
     border-bottom:1px solid transparent;padding-bottom:3px;
     transition:opacity .2s, border-color .2s;
   }
   nav a:hover, nav a:focus-visible{opacity:1;border-color:var(--dourado);}
   nav a:focus-visible{outline:2px solid var(--dourado);outline-offset:3px;}
+  @media (min-width:860px){
+    .header-inner{flex-direction:row;justify-content:space-between;gap:0;padding:14px 28px;}
+    .brand-icon{height:48px;}
+    nav{width:auto;justify-content:flex-end;gap:26px;}
+  }
 
   /* ---------- HERO ---------- */
   .hero{
@@ -400,16 +405,16 @@
   const iconHorse = `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 52c3-13 1-18 1-25 0-9 7-14 14-14s13.5 6 14 12c1 7 4 12 6 27"/><circle cx="41" cy="18" r="3.4"/></svg>`;
 
   function cardHTML(item, tipoLabel){
-    const linhagem = (item.pai || item.mae) ? `
+    const linhagem = (item.pai || item.mae || item.nascimento) ? `
         <div class="linhagem">
           ${item.pai ? `<span><b>Pai</b>${item.pai}</span>` : ""}
           ${item.mae ? `<span><b>Mãe</b>${item.mae}</span>` : ""}
+          ${item.nascimento ? `<span><b>Nascimento</b>${item.nascimento}</span>` : ""}
         </div>` : "";
     return `
     <article class="card reveal">
       <div class="card-media">
         ${iconHorse}
-        ${item.nascimento ? `<div class="selo"><span>Nasc.</span><b>${item.nascimento}</b></div>` : ""}
       </div>
       <div class="card-body">
         <h3>${item.nome}</h3>
