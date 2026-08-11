@@ -193,13 +193,14 @@
     display:flex;align-items:center;justify-content:center;
   }
   .card-media svg{width:64px;height:64px;color:rgba(242,233,216,0.85);}
-  .card-media.tem-fotos{padding:0;overflow:hidden;}
+  .card-media.tem-fotos{height:240px;padding:0;overflow:hidden;}
   .carousel-track{
     display:flex;height:100%;width:100%;
     transition:transform .35s ease;
   }
-  .carousel-track img{
-    width:100%;height:100%;flex:0 0 100%;object-fit:cover;display:block;
+  .card-media.tem-fotos img{
+    width:100%;height:100%;flex:0 0 100%;
+    object-fit:contain;object-position:center;display:block;
   }
   .carousel-btn{
     position:absolute;top:50%;transform:translateY(-50%);
