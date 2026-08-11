@@ -464,7 +464,11 @@
       </div>
       <p class="count" id="coberturas-count-label"></p>
     </div>
-    <div class="grid" id="grid-coberturas"></div>
+    <div class="carrossel-wrap">
+      <button class="carrossel-arrow prev" onclick="rolarCarrossel('grid-coberturas', -1)" aria-label="Ver anteriores">‹</button>
+      <div class="grid carrossel" id="grid-coberturas"></div>
+      <button class="carrossel-arrow next" onclick="rolarCarrossel('grid-coberturas', 1)" aria-label="Ver próximos">›</button>
+    </div>
   </div>
 </section>
 
@@ -477,7 +481,11 @@
       </div>
       <p class="count" id="embrioes-count-label"></p>
     </div>
-    <div class="grid" id="grid-embrioes"></div>
+    <div class="carrossel-wrap">
+      <button class="carrossel-arrow prev" onclick="rolarCarrossel('grid-embrioes', -1)" aria-label="Ver anteriores">‹</button>
+      <div class="grid carrossel" id="grid-embrioes"></div>
+      <button class="carrossel-arrow next" onclick="rolarCarrossel('grid-embrioes', 1)" aria-label="Ver próximos">›</button>
+    </div>
   </div>
 </section>
 
