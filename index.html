@@ -240,6 +240,12 @@
     object-fit:contain;object-position:center;display:block;
     cursor:zoom-in;
   }
+  .card-media.tem-fotos .slide-video{
+    width:100%;height:100%;flex:0 0 100%;background:#000;
+  }
+  .card-media.tem-fotos .slide-video iframe{
+    width:100%;height:100%;border:none;display:block;
+  }
 
   /* ---------- LIGHTBOX (foto ampliada com zoom) ---------- */
   .lightbox{
@@ -621,25 +627,51 @@
     return url;
   }
 
+  // Converte um link de vídeo (YouTube ou Google Drive) em um link de player incorporável.
+  function converterLinkVideo(url){
+    url = url.trim();
+    const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if(yt) return `https://www.youtube.com/embed/${yt[1]}`;
+    const drive = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if(drive) return `https://drive.google.com/file/d/${drive[1]}/preview`;
+    return url;
+  }
+
+  function slideHTML(midia, item){
+    if(midia.tipo === "video"){
+      return `<div class="slide-video"><iframe src="${midia.src}" title="${item.nome}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    }
+    return `<img src="${midia.src}" alt="${item.nome}" loading="lazy" onclick="abrirLightbox('${midia.src}', event)">`;
+  }
+
   function mediaHTML(item){
     const fotos = (item.fotos || "")
       .split(/[,;]/)
-      .map(f => converterLinkFoto(f))
-      .filter(f => f.length > 0);
+      .map(f => f.trim())
+      .filter(f => f.length > 0)
+      .map(f => ({ tipo: "foto", src: converterLinkFoto(f) }));
 
-    if(fotos.length === 0){
+    const videos = (item.videos || "")
+      .split(/[,;]/)
+      .map(v => v.trim())
+      .filter(v => v.length > 0)
+      .map(v => ({ tipo: "video", src: converterLinkVideo(v) }));
+
+    const midias = [...fotos, ...videos];
+
+    if(midias.length === 0){
       return `<div class="card-media">${iconHorse}</div>`;
     }
-    if(fotos.length === 1){
-      return `<div class="card-media tem-fotos"><img src="${fotos[0]}" alt="${item.nome}" loading="lazy" onclick="abrirLightbox('${fotos[0]}', event)"></div>`;
+    if(midias.length === 1){
+      return `<div class="card-media tem-fotos">${slideHTML(midias[0], item)}</div>`;
     }
-    const slides = fotos.map(f => `<img src="${f}" alt="${item.nome}" loading="lazy" onclick="abrirLightbox('${f}', event)">`).join("");
-    const dots = fotos.map((_, i) => `<button class="carousel-dot${i===0 ? " ativo" : ""}" onclick="irParaFoto(this, ${i})" aria-label="Foto ${i+1}"></button>`).join("");
+    const slides = midias.map(m => slideHTML(m, item)).join("");
+    const dots = midias.map((_, i) => `<button class="carousel-dot${i===0 ? " ativo" : ""}" onclick="irParaFoto(this, ${i})" aria-label="Item ${i+1}"></button>`).join("");
     return `
       <div class="card-media tem-fotos" data-idx="0">
         <div class="carousel-track">${slides}</div>
-        <button class="carousel-btn prev" onclick="moverCarrossel(this, -1)" aria-label="Foto anterior">‹</button>
-        <button class="carousel-btn next" onclick="moverCarrossel(this, 1)" aria-label="Próxima foto">›</button>
+        <button class="carousel-btn prev" onclick="moverCarrossel(this, -1)" aria-label="Anterior">‹</button>
+        <button class="carousel-btn next" onclick="moverCarrossel(this, 1)" aria-label="Próximo">›</button>
         <div class="carousel-dots">${dots}</div>
       </div>`;
   }
@@ -718,6 +750,7 @@
     if(h.startsWith("valor")) return "valor";
     if(h.startsWith("observ")) return "obs";
     if(h.startsWith("foto")) return "fotos";
+    if(h.startsWith("video")) return "videos";
     return h; // mantém como veio, caso seja uma coluna extra não usada
   }
 
@@ -741,7 +774,8 @@
             nascimento: l.nascimento,
             valor: l.valor,
             obs: l.obs,
-            fotos: l.fotos
+            fotos: l.fotos,
+            videos: l.videos
           }))
           .filter(l => l.nome && l.tipo);
         if(linhas.length === 0){
