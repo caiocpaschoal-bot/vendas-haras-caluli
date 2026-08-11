@@ -62,19 +62,22 @@
   .brand-icon{height:64px;width:auto;flex-shrink:0;display:block;}
   .brand-name{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--areia);}
   .brand-sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.14em;color:var(--dourado);text-transform:uppercase;}
-  nav{display:flex;justify-content:center;align-items:center;gap:18px;row-gap:8px;flex-wrap:wrap;width:100%;}
+  nav{display:flex;justify-content:center;align-items:center;gap:10px;row-gap:8px;flex-wrap:wrap;width:100%;}
   nav a{
     color:var(--areia);opacity:0.82;text-decoration:none;font-size:0.86rem;white-space:nowrap;
     font-family:'Inter',sans-serif;font-weight:500;
     border-bottom:1px solid transparent;padding-bottom:3px;
     transition:opacity .2s, border-color .2s;
   }
+  nav a:not(:last-child)::after{
+    content:"/";margin-left:10px;color:rgba(242,233,216,0.35);
+  }
   nav a:hover, nav a:focus-visible{opacity:1;border-color:var(--dourado);}
   nav a:focus-visible{outline:2px solid var(--dourado);outline-offset:3px;}
   @media (min-width:860px){
     .header-inner{flex-direction:row;justify-content:space-between;gap:0;padding:14px 28px;}
     .brand-icon{height:48px;}
-    nav{width:auto;justify-content:flex-end;gap:26px;}
+    nav{width:auto;justify-content:flex-end;gap:14px;}
   }
 
   /* ---------- HERO ---------- */
