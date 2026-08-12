@@ -931,12 +931,29 @@
 
   window.tratarErroFoto = function(img){
     const fallback = img.dataset.fallback;
-    if(fallback && img.src !== fallback && !img.dataset.tentouFallback){
+    const tentativas = parseInt(img.dataset.tentativas || "0", 10);
+    const maxTentativas = 3; // total ~2s + 4s + 6s de espera antes de desistir
+
+    // 1ª falha: tenta o formato alternativo (fallback) imediatamente
+    if(fallback && img.src.split("?cachebust=")[0] !== fallback && !img.dataset.tentouFallback){
       img.dataset.tentouFallback = "1";
       img.src = fallback;
       return;
     }
-    // Nenhum dos dois formatos funcionou: mostra a logo do haras no lugar
+
+    // Falhas seguintes: pode ser o Google ainda processando a miniatura
+    // (comum em fotos recém-adicionadas) — tenta de novo com um pequeno atraso
+    if(tentativas < maxTentativas){
+      img.dataset.tentativas = tentativas + 1;
+      const alvo = fallback || img.src.split("?cachebust=")[0];
+      const atraso = 2000 * (tentativas + 1);
+      setTimeout(() => {
+        img.src = alvo + (alvo.includes("?") ? "&" : "?") + "cachebust=" + Date.now();
+      }, atraso);
+      return;
+    }
+
+    // Esgotou as tentativas: mostra a logo do haras no lugar
     img.onerror = null;
     img.onclick = null;
     img.src = `data:image/png;base64,${LOGO_ICONE_B64}`;
