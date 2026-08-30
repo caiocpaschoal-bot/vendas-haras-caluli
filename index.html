@@ -762,13 +762,13 @@
 
   function mediaHTML(item){
     const fotos = (item.fotos || "")
-      .split(/[,;]/)
+      .split(/[,;\s]+/)
       .map(f => f.trim())
       .filter(f => f.length > 0)
       .map(f => ({ tipo: "foto", src: converterLinkFoto(f), fallback: converterLinkFotoFallback(f) }));
 
     const videos = (item.videos || "")
-      .split(/[,;]/)
+      .split(/[,;\s]+/)
       .map(v => v.trim())
       .filter(v => v.length > 0)
       .map(v => ({ tipo: "video", info: analisarVideo(v) }));
