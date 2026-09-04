@@ -2,8 +2,7 @@
   included_files = ["index.html"]
 
 [[redirects]]
-  from = "/*"
-  query = {lote = ":slug"}
-  to = "/.netlify/functions/lote?slug=:slug"
+  from = "/lote/*"
+  to = "/.netlify/functions/lote?slug=:splat"
   status = 200
   force = true
