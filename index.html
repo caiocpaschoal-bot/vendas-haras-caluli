@@ -254,6 +254,7 @@
     background:var(--areia-clara);border:1px solid var(--linha);border-radius:4px;
     overflow:hidden;display:flex;flex-direction:column;
     transition:transform .25s ease, box-shadow .25s ease;
+    scroll-margin-top:110px;
   }
   .block.dark .card{background:rgba(242,233,216,0.05);border-color:rgba(242,233,216,0.18);}
   .card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(74,25,23,0.22);}
@@ -381,6 +382,25 @@
   .selo b{font-size:0.6rem;}
   .card-body{padding:20px 20px 22px;display:flex;flex-direction:column;gap:10px;flex:1;}
   .card-body h3{margin:0;font-size:1.2rem;}
+  .card-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .card-title-row h3{flex:1;}
+  .btn-compartilhar{
+    flex-shrink:0;width:30px;height:30px;border-radius:50%;
+    background:none;border:1px solid var(--linha);color:var(--tinta-suave);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .2s, color .2s;
+  }
+  .btn-compartilhar:hover{background:rgba(138,90,46,0.1);color:var(--couro-escuro);}
+  .block.dark .btn-compartilhar{border-color:rgba(242,233,216,0.25);color:rgba(242,233,216,0.75);}
+  .block.dark .btn-compartilhar:hover{background:rgba(242,233,216,0.12);color:var(--areia);}
+  .card.lote-destacado{
+    outline:3px solid var(--dourado);outline-offset:4px;
+    animation:pulseDestaque 1.3s ease-in-out 2;
+  }
+  @keyframes pulseDestaque{
+    0%,100%{box-shadow:0 0 0 0 rgba(176,132,50,0.45);}
+    50%{box-shadow:0 0 0 12px rgba(176,132,50,0);}
+  }
   .tipo-tag{
     font-family:'IBM Plex Mono',monospace;font-size:0.68rem;letter-spacing:0.08em;
     text-transform:uppercase;color:var(--couro);margin:-4px 0 0;
@@ -809,7 +829,18 @@
       </div>`;
   }
 
+  // Gera um identificador curto e limpo a partir do nome do lote, para usar na URL
+  function gerarSlug(nome){
+    return String(nome || "")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-+|-+$)/g, "");
+  }
+
   function cardHTML(item, tipoLabel){
+    const slug = gerarSlug(item.nome);
     const linhagem = (item.pai || item.mae || item.nascimento) ? `
         <div class="linhagem">
           ${item.pai ? `<span><b>Pai</b>${item.pai}</span>` : ""}
@@ -817,10 +848,15 @@
           ${item.nascimento ? `<span><b>Nascimento</b>${item.nascimento}</span>` : ""}
         </div>` : "";
     return `
-    <article class="card reveal">
+    <article class="card reveal" id="lote-${slug}">
       ${mediaHTML(item)}
       <div class="card-body">
-        <h3>${item.nome}</h3>
+        <div class="card-title-row">
+          <h3>${item.nome}</h3>
+          <button class="btn-compartilhar" onclick="compartilharLote('${item.nome.replace(/'/g,"")}', '${slug}')" aria-label="Compartilhar este lote" title="Compartilhar este lote">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+          </button>
+        </div>
         <p class="tipo-tag">${tipoLabel}</p>
         ${linhagem}
         <p class="card-desc">${item.obs || ""}</p>
@@ -873,6 +909,44 @@
       entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); observer.unobserve(e.target); } });
     }, {threshold:0.12});
     document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+
+    abrirLoteDaURL();
+  }
+
+  // Gera um link direto para o lote e compartilha (ou copia, se o dispositivo não suportar compartilhar)
+  window.compartilharLote = function(nome, slug){
+    const url = `${location.origin}${location.pathname}?lote=${slug}`;
+    const texto = `Dá uma olhada nesse lote do Haras Calúli: ${nome}`;
+    if(navigator.share){
+      navigator.share({ title: nome, text: texto, url: url }).catch(()=>{});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(()=>{
+        alert("Link do lote copiado! Agora é só colar onde quiser compartilhar.");
+      }).catch(()=>{
+        prompt("Copie o link do lote:", url);
+      });
+    } else {
+      prompt("Copie o link do lote:", url);
+    }
+  };
+
+  // Se a URL tiver ?lote=algo, rola até o card certo e destaca ele
+  function abrirLoteDaURL(){
+    const params = new URLSearchParams(location.search);
+    const slug = params.get("lote");
+    if(!slug) return;
+    setTimeout(() => {
+      const el = document.getElementById("lote-" + slug);
+      if(!el) return;
+      const carrossel = el.closest(".grid.carrossel");
+      if(carrossel){
+        const offset = el.offsetLeft - carrossel.offsetLeft;
+        carrossel.scrollLeft = Math.max(offset - 16, 0);
+      }
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("lote-destacado");
+      setTimeout(() => el.classList.remove("lote-destacado"), 3200);
+    }, 300);
   }
 
   // Converte o texto de um cabeçalho da planilha (com acento/maiúscula/variações)
