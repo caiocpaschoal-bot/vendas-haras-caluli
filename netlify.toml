@@ -1,0 +1,9 @@
+[functions]
+  included_files = ["index.html"]
+
+[[redirects]]
+  from = "/*"
+  query = {lote = ":slug"}
+  to = "/.netlify/functions/lote?slug=:slug"
+  status = 200
+  force = true
