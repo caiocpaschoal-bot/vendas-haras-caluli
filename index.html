@@ -863,10 +863,10 @@
         <div class="card-foot">
           <span class="price">${item.valor || ""}</span>
         </div>
-        <button class="btn outline" onclick="irParaContato('${item.nome.replace(/'/g,"")}', '${tipoLabel}')" style="margin-top:6px;justify-content:center;">
+        <button class="btn outline" onclick="irParaContato('${item.nome.replace(/'/g,"")}', '${tipoLabel}', '${slug}')" style="margin-top:6px;justify-content:center;">
           Tenho interesse
         </button>
-        <button class="btn indique" onclick="indicarCliente('${item.nome.replace(/'/g,"")}', '${tipoLabel}')" style="margin-top:8px;justify-content:center;">
+        <button class="btn indique" onclick="indicarCliente('${item.nome.replace(/'/g,"")}', '${tipoLabel}', '${slug}')" style="margin-top:8px;justify-content:center;">
           Indique e ganhe 10%
         </button>
       </div>
@@ -1026,14 +1026,16 @@
     document.body.style.overflow = "";
   };
 
-  window.irParaContato = function(nome, tipo){
-    const texto = `Olá, Haras Calúli! Tenho interesse em: ${nome} (${tipo}). Podem me passar mais informações?`;
+  window.irParaContato = function(nome, tipo, slug){
+    const link = slug ? `${location.origin}/lote/${slug}` : "";
+    const texto = `Olá, Haras Calúli! Tenho interesse em: ${nome} (${tipo}). Podem me passar mais informações?${link ? "\n" + link : ""}`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
     window.open(url, "_blank");
   };
 
-  window.indicarCliente = function(nome, tipo){
-    const texto = `Olá, Haras Calúli! Tenho um cliente para esse lote: ${nome} (${tipo}). Como funciona a indicação?`;
+  window.indicarCliente = function(nome, tipo, slug){
+    const link = slug ? `${location.origin}/lote/${slug}` : "";
+    const texto = `Olá, Haras Calúli! Tenho um cliente para esse lote: ${nome} (${tipo}). Como funciona a indicação?${link ? "\n" + link : ""}`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
     window.open(url, "_blank");
   };
