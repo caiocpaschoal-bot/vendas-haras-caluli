@@ -495,7 +495,7 @@
       <a href="#coberturas">Coberturas</a>
       <a href="#embrioes">Embriões</a>
       <a href="#aspiracoes">Aspiração Folicular</a>
-      <a href="https://www.instagram.com/harascaluli" target="_blank" rel="noopener">Instagram @harascaluli</a>
+      <a href="https://www.instagram.com/harascaluli" target="_blank" rel="noopener" onclick="rastrear('clique_instagram')">Instagram @harascaluli</a>
       <a href="#contato">Contato</a>
     </nav>
   </div>
@@ -506,10 +506,10 @@
     <h1>Há mais de 20 anos, o Haras Calúli escreve sua história entre os grandes nomes da Marcha Picada, unindo tradição, genética consagrada e resultados nas principais pistas do Brasil.</h1>
     <p class="lede">Uma criação movida pela excelência, formando gerações de campeões e preservando um legado que se renova a cada nascimento.</p>
     <div class="hero-index">
-      <a href="#animais"><span>Animais à Venda</span><span class="n" id="count-animais">00</span></a>
-      <a href="#coberturas"><span>Coberturas</span><span class="n" id="count-coberturas">00</span></a>
-      <a href="#embrioes"><span>Embriões</span><span class="n" id="count-embrioes">00</span></a>
-      <a href="#aspiracoes"><span>Aspiração Folicular</span><span class="n" id="count-aspiracoes">00</span></a>
+      <a href="#animais" onclick="rastrear('clique_atalho_categoria', {categoria: 'animais'})"><span>Animais à Venda</span><span class="n" id="count-animais">00</span></a>
+      <a href="#coberturas" onclick="rastrear('clique_atalho_categoria', {categoria: 'coberturas'})"><span>Coberturas</span><span class="n" id="count-coberturas">00</span></a>
+      <a href="#embrioes" onclick="rastrear('clique_atalho_categoria', {categoria: 'embrioes'})"><span>Embriões</span><span class="n" id="count-embrioes">00</span></a>
+      <a href="#aspiracoes" onclick="rastrear('clique_atalho_categoria', {categoria: 'aspiracoes'})"><span>Aspiração Folicular</span><span class="n" id="count-aspiracoes">00</span></a>
     </div>
   </div>
 </section>
@@ -704,6 +704,15 @@
     // que a Claude te passou no chat). Deixe como "" para usar os exemplos.
     sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?output=csv"
   };
+
+  // Manda um evento pro Google Analytics, se ele estiver carregado (nunca quebra o site se falhar)
+  function rastrear(evento, params){
+    try{
+      if(typeof gtag === "function"){
+        gtag("event", evento, params || {});
+      }
+    }catch(e){ /* nunca deixa isso quebrar o site */ }
+  }
 
   // ======================================================================
   // DADOS DE EXEMPLO — usados apenas se CONFIG.sheetCsvUrl estiver vazio
@@ -922,6 +931,7 @@
 
   // Gera um link direto para o lote e compartilha (ou copia, se o dispositivo não suportar compartilhar)
   window.compartilharLote = function(nome, slug){
+    rastrear("compartilhar_lote", { lote: nome, slug: slug });
     const url = `${location.origin}/lote/${slug}`;
     const texto = `Dá uma olhada nesse lote do Haras Calúli: ${nome}`;
     if(navigator.share){
@@ -1034,6 +1044,7 @@
   };
 
   window.irParaContato = function(nome, tipo, slug){
+    rastrear("tenho_interesse", { lote: nome, tipo: tipo });
     const link = slug ? `${location.origin}/lote/${slug}` : "";
     const texto = `Olá, Haras Calúli! Tenho interesse em: ${nome} (${tipo}). Podem me passar mais informações?${link ? "\n" + link : ""}`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
@@ -1041,6 +1052,7 @@
   };
 
   window.indicarCliente = function(nome, tipo, slug){
+    rastrear("indicar_cliente", { lote: nome, tipo: tipo });
     const link = slug ? `${location.origin}/lote/${slug}` : "";
     const texto = `Olá, Haras Calúli! Tenho um cliente para esse lote: ${nome} (${tipo}). Como funciona a indicação?${link ? "\n" + link : ""}`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
@@ -1163,6 +1175,7 @@
     }
     const texto = `Olá, Haras Calúli! Meu nome é ${nome} (tel: ${tel}). Interesse: ${interesse}. ${msg}`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
+    rastrear("formulario_contato_enviado", { interesse: interesse });
     status.textContent = "Abrindo WhatsApp...";
     window.open(url, "_blank");
   });
