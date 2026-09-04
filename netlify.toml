@@ -2,25 +2,7 @@
   included_files = ["index.html"]
 
 [[redirects]]
-  from = "/teste-redirect"
-  to = "/og-image.jpg"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/teste-func"
-  to = "/.netlify/functions/lote?slug=kaio-do-caluli"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/teste-coringa/*"
-  to = "/og-image.jpg"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/lote/*"
-  to = "/.netlify/functions/lote?slug=:splat"
+  to = "/.netlify/functions/lote/:splat"
   status = 200
   force = true
