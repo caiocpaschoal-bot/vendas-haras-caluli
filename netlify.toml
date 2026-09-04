@@ -2,6 +2,12 @@
   included_files = ["index.html"]
 
 [[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/lote/*"
   to = "/.netlify/functions/lote/:splat"
   status = 200
