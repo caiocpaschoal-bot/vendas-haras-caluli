@@ -2,6 +2,12 @@
   included_files = ["index.html"]
 
 [[redirects]]
+  from = "/teste-redirect"
+  to = "/og-image.jpg"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/lote/*"
   to = "/.netlify/functions/lote?slug=:splat"
   status = 200
