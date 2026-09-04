@@ -70,7 +70,13 @@ function lerIndexHtml() {
 }
 
 exports.handler = async function (event) {
-  const slug = event.queryStringParameters && event.queryStringParameters.slug;
+  // Pega o slug do caminho da URL (mais confiável que query string em redirects do Netlify).
+  // Aceita tanto /.netlify/functions/lote/algo quanto ?slug=algo (retrocompatibilidade).
+  const caminho = event.path || "";
+  const doPath = caminho.match(/\/lote\/([^/?#]+)/);
+  const slug = doPath
+    ? decodeURIComponent(doPath[1])
+    : (event.queryStringParameters && event.queryStringParameters.slug);
   let html = lerIndexHtml();
 
   try {
