@@ -714,6 +714,32 @@
     }catch(e){ /* nunca deixa isso quebrar o site */ }
   }
 
+  // Trata cada seção como uma "página virtual" no Analytics, disparando
+  // um page_view quando a pessoa rola até ela (uma vez por visita).
+  function rastrearVisualizacaoSecao(id, titulo){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if(entry.isIntersecting){
+          rastrear("page_view", {
+            page_title: titulo,
+            page_location: location.origin + "/secao/" + id,
+            page_path: "/secao/" + id
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.35 });
+    observer.observe(el);
+  }
+
+  rastrearVisualizacaoSecao("animais", "Animais à Venda");
+  rastrearVisualizacaoSecao("coberturas", "Coberturas Disponíveis");
+  rastrearVisualizacaoSecao("embrioes", "Embriões à Venda");
+  rastrearVisualizacaoSecao("aspiracoes", "Aspiração Folicular");
+  rastrearVisualizacaoSecao("contato", "Contato");
+
   // ======================================================================
   // DADOS DE EXEMPLO — usados apenas se CONFIG.sheetCsvUrl estiver vazio
   // ou se a planilha não puder ser carregada.
@@ -1033,6 +1059,11 @@
 
   window.abrirHistoria = function(e){
     if(e) e.preventDefault();
+    rastrear("page_view", {
+      page_title: "História",
+      page_location: location.origin + "/secao/historia",
+      page_path: "/secao/historia"
+    });
     document.getElementById("historia").classList.add("aberta");
     document.body.style.overflow = "hidden";
     document.getElementById("historia").scrollTop = 0;
