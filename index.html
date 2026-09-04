@@ -915,7 +915,7 @@
 
   // Gera um link direto para o lote e compartilha (ou copia, se o dispositivo não suportar compartilhar)
   window.compartilharLote = function(nome, slug){
-    const url = `${location.origin}${location.pathname}?lote=${slug}`;
+    const url = `${location.origin}/lote/${slug}`;
     const texto = `Dá uma olhada nesse lote do Haras Calúli: ${nome}`;
     if(navigator.share){
       navigator.share({ title: nome, text: texto, url: url }).catch(()=>{});
@@ -930,10 +930,17 @@
     }
   };
 
-  // Se a URL tiver ?lote=algo, rola até o card certo e destaca ele
-  function abrirLoteDaURL(){
+  // Descobre o slug do lote tanto no formato novo (/lote/algo) quanto no antigo (?lote=algo)
+  function slugDaURL(){
+    const doPath = location.pathname.match(/\/lote\/([^/?#]+)/);
+    if(doPath) return decodeURIComponent(doPath[1]);
     const params = new URLSearchParams(location.search);
-    const slug = params.get("lote");
+    return params.get("lote");
+  }
+
+  // Se a URL apontar para um lote, rola até o card certo e destaca ele
+  function abrirLoteDaURL(){
+    const slug = slugDaURL();
     if(!slug) return;
     setTimeout(() => {
       const el = document.getElementById("lote-" + slug);
