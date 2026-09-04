@@ -122,14 +122,28 @@ exports.handler = async function (event) {
         const descricaoEsc = escapaHtml(descricao);
         const imagemEsc = escapaHtml(imagem);
 
+        // Dados estruturados (schema.org) — ajuda o Google a entender que é
+        // um anúncio de animal, com nome, foto e descrição.
+        const jsonLd = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": nome,
+          "description": obsCompleta || descricao,
+          "image": imagem,
+          "brand": { "@type": "Organization", "name": "Haras Calúli" },
+          "category": tipo
+        });
+
         html = html
+          .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${descricaoEsc}">`)
           .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${tituloEsc}">`)
           .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${descricaoEsc}">`)
           .replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${imagemEsc}">`)
           .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${tituloEsc}">`)
           .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${descricaoEsc}">`)
           .replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${imagemEsc}">`)
-          .replace(/<title>[^<]*<\/title>/, `<title>${tituloEsc}</title>`);
+          .replace(/<title>[^<]*<\/title>/, `<title>${tituloEsc}</title>`)
+          .replace("</head>", `<script type="application/ld+json">${jsonLd}</script>\n</head>`);
       }
     }
   } catch (erro) {
