@@ -396,6 +396,7 @@
     background:none;border:1px solid var(--linha);color:var(--tinta-suave);
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     transition:background .2s, color .2s;
+    text-decoration:none;
   }
   .btn-compartilhar:hover{background:rgba(138,90,46,0.1);color:var(--couro-escuro);}
   .block.dark .btn-compartilhar{border-color:rgba(242,233,216,0.25);color:rgba(242,233,216,0.75);}
@@ -895,9 +896,9 @@
       <div class="card-body">
         <div class="card-title-row">
           <h3>${item.nome}</h3>
-          <button class="btn-compartilhar" onclick="compartilharLote('${item.nome.replace(/'/g,"")}', '${slug}')" aria-label="Compartilhar este lote" title="Compartilhar este lote">
+          <a class="btn-compartilhar" href="/lote/${slug}" onclick="event.preventDefault(); compartilharLote('${item.nome.replace(/'/g,"")}', '${slug}')" aria-label="Compartilhar este lote" title="Compartilhar este lote">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
-          </button>
+          </a>
         </div>
         <p class="tipo-tag">${tipoLabel}</p>
         ${linhagem}
