@@ -1094,7 +1094,7 @@
   // Converte o texto de um cabeçalho da planilha de Compradores no nome de campo padrão.
   function cabecalhoPadraoComprador(header){
     const h = normaliza(header);
-    if(h.startsWith("nome")) return "nome";
+    if(h.startsWith("comprador") || h.startsWith("nome")) return "nome";
     if(h.startsWith("cidade")) return "cidade";
     if(h.startsWith("animal")) return "animal";
     if(h.startsWith("depoim")) return "depoimento";
