@@ -1110,17 +1110,15 @@
       : `<div class="card-media">${iconHorse}</div>`;
     return `
     <article class="card reveal">
-      ${media}
       <div class="card-body">
-        <div class="card-title-row">
-          <h3>${item.nome}</h3>
+        <div class="linhagem">
+          <span><b>Comprador</b>${item.nome || ""}</span>
+          <span><b>Cidade/Estado</b>${item.cidade || ""}</span>
+          <span><b>Lote</b>${item.animal || ""}</span>
+          <span><b>Depoimento</b>${item.depoimento ? `"${item.depoimento}"` : ""}</span>
+          <span><b>Fotos</b></span>
         </div>
-        ${item.cidade ? `<p class="tipo-tag">${item.cidade}</p>` : ""}
-        ${item.depoimento ? `<p class="card-desc">"${item.depoimento}"</p>` : ""}
-        <div class="card-foot">
-          ${item.animal ? `<span class="price">${item.animal}</span>` : ""}
-        </div>
-        ${item.data ? `<p style="font-size:0.78rem;opacity:0.75;margin-top:2px;">${item.data}</p>` : ""}
+        ${media}
       </div>
     </article>`;
   }
