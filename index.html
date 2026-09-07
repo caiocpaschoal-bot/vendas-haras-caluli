@@ -515,6 +515,7 @@
       <a href="#aspiracoes">Aspiração Folicular</a>
       <a href="https://www.instagram.com/harascaluli" target="_blank" rel="noopener" onclick="rastrear('clique_instagram')">Instagram @harascaluli</a>
       <a href="#contato">Contato</a>
+      <a href="#compradores">Compradores</a>
     </nav>
   </div>
 </header>
@@ -706,6 +707,23 @@
   </div>
 </section>
 
+<!-- ===================== COMPRADORES ===================== -->
+<section class="block paper" id="compradores">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2>Nossos Compradores</h2>
+      </div>
+      <p class="count" id="compradores-count-label"></p>
+    </div>
+    <div class="carrossel-wrap">
+      <button class="carrossel-arrow prev" onclick="rolarCarrossel('grid-compradores', -1)" aria-label="Ver anteriores">‹</button>
+      <div class="grid carrossel" id="grid-compradores"></div>
+      <button class="carrossel-arrow next" onclick="rolarCarrossel('grid-compradores', 1)" aria-label="Ver próximos">›</button>
+    </div>
+  </div>
+</section>
+
 <footer>
   <b>Haras Calúli</b> — site desenvolvido com Claude. Conteúdo de exemplo, pronto para receber os dados reais.
 </footer>
@@ -720,7 +738,8 @@
 
     // Cole aqui o link CSV publicado da sua planilha Google (veja instruções
     // que a Claude te passou no chat). Deixe como "" para usar os exemplos.
-    sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?output=csv"
+    sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?output=csv",
+    sheetCompradoresCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?gid=2062882540&single=true&output=csv"
   };
 
   // Manda um evento pro Google Analytics, se ele estiver carregado (nunca quebra o site se falhar)
@@ -757,6 +776,7 @@
   rastrearVisualizacaoSecao("embrioes", "Embriões à Venda");
   rastrearVisualizacaoSecao("aspiracoes", "Aspiração Folicular");
   rastrearVisualizacaoSecao("contato", "Contato");
+  rastrearVisualizacaoSecao("compradores", "Compradores");
 
   // ======================================================================
   // DADOS DE EXEMPLO — usados apenas se CONFIG.sheetCsvUrl estiver vazio
@@ -1071,7 +1091,87 @@
     });
   }
 
+  // Converte o texto de um cabeçalho da planilha de Compradores no nome de campo padrão.
+  function cabecalhoPadraoComprador(header){
+    const h = normaliza(header);
+    if(h.startsWith("nome")) return "nome";
+    if(h.startsWith("cidade")) return "cidade";
+    if(h.startsWith("animal")) return "animal";
+    if(h.startsWith("depoim")) return "depoimento";
+    if(h.startsWith("foto")) return "foto";
+    if(h.startsWith("data")) return "data";
+    return h;
+  }
+
+  function compradorCardHTML(item){
+    const foto = (item.foto || "").trim();
+    const media = foto
+      ? `<div class="card-media tem-fotos"><img src="${converterLinkFoto(foto)}" data-fallback="${converterLinkFotoFallback(foto)}" alt="${item.nome} — Cliente Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)"></div>`
+      : `<div class="card-media">${iconHorse}</div>`;
+    return `
+    <article class="card reveal">
+      ${media}
+      <div class="card-body">
+        <div class="card-title-row">
+          <h3>${item.nome}</h3>
+        </div>
+        ${item.cidade ? `<p class="tipo-tag">${item.cidade}</p>` : ""}
+        ${item.depoimento ? `<p class="card-desc">"${item.depoimento}"</p>` : ""}
+        <div class="card-foot">
+          ${item.animal ? `<span class="price">${item.animal}</span>` : ""}
+        </div>
+        ${item.data ? `<p style="font-size:0.78rem;opacity:0.75;margin-top:2px;">${item.data}</p>` : ""}
+      </div>
+    </article>`;
+  }
+
+  function renderCompradores(lista){
+    document.getElementById("grid-compradores").innerHTML = lista.map(compradorCardHTML).join("");
+    document.getElementById("compradores-count-label").textContent = lista.length + " cliente(s) satisfeito(s)";
+
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); observer.unobserve(e.target); } });
+    }, {threshold:0.12});
+    document.querySelectorAll("#grid-compradores .reveal").forEach(el => observer.observe(el));
+  }
+
+  function carregarCompradores(){
+    if(!CONFIG.sheetCompradoresCsvUrl){
+      document.getElementById("compradores").style.display = "none";
+      return;
+    }
+    Papa.parse(CONFIG.sheetCompradoresCsvUrl, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: cabecalhoPadraoComprador,
+      complete: function(resultado){
+        const linhas = (resultado.data || [])
+          .map(l => ({
+            nome: l.nome,
+            cidade: l.cidade,
+            animal: l.animal,
+            depoimento: l.depoimento,
+            foto: l.foto,
+            data: l.data
+          }))
+          .filter(l => l.nome);
+        if(linhas.length === 0){
+          console.warn("Aba Compradores carregada mas sem linhas válidas — seção ficará oculta.");
+          document.getElementById("compradores").style.display = "none";
+          return;
+        }
+        renderCompradores(linhas);
+      },
+      error: function(erro){
+        console.warn("Não foi possível carregar a aba Compradores — seção ficará oculta.", erro);
+        document.getElementById("compradores").style.display = "none";
+      }
+    });
+  }
+
   carregarDados();
+  carregarCompradores();
 
   document.getElementById("contato-telefone-txt").textContent = CONFIG.telefoneExibicao;
 
