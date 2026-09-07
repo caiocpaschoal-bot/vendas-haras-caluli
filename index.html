@@ -1306,6 +1306,18 @@
     e.target.classList.toggle("zoom");
   };
 
+  // Formata o telefone no padrão (XX) XXXXX-XXXX enquanto a pessoa digita
+  function formatarTelefone(v){
+    const d = v.replace(/\D/g, "").slice(0, 11);
+    if(d.length === 0) return "";
+    if(d.length <= 2) return `(${d}`;
+    if(d.length <= 7) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+    return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7,11)}`;
+  }
+  document.getElementById("f-tel").addEventListener("input", function(e){
+    e.target.value = formatarTelefone(e.target.value);
+  });
+
   document.getElementById("contato-form").addEventListener("submit", function(e){
     e.preventDefault();
     const nome = document.getElementById("f-nome").value.trim();
