@@ -1096,7 +1096,7 @@
     const h = normaliza(header);
     if(h.startsWith("comprador") || h.startsWith("nome")) return "nome";
     if(h.startsWith("cidade")) return "cidade";
-    if(h.startsWith("animal")) return "animal";
+    if(h.startsWith("animal") || h.startsWith("lote")) return "animal";
     if(h.startsWith("depoim")) return "depoimento";
     if(h.startsWith("foto")) return "foto";
     if(h.startsWith("data")) return "data";
