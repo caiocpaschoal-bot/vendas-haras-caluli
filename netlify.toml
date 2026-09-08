@@ -12,3 +12,9 @@
   to = "/.netlify/functions/lote/:splat"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/historia"
+  to = "/index.html"
+  status = 200
+  force = true
