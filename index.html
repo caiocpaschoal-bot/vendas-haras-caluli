@@ -1183,18 +1183,39 @@
     if(e) e.preventDefault();
     rastrear("page_view", {
       page_title: "História",
-      page_location: location.origin + "/secao/historia",
-      page_path: "/secao/historia"
+      page_location: location.origin + "/historia",
+      page_path: "/historia"
     });
     document.getElementById("historia").classList.add("aberta");
     document.body.style.overflow = "hidden";
     document.getElementById("historia").scrollTop = 0;
+    if(location.pathname !== "/historia"){
+      history.pushState({historia:true}, "", "/historia");
+    }
   };
 
   window.fecharHistoria = function(){
     document.getElementById("historia").classList.remove("aberta");
     document.body.style.overflow = "";
+    if(location.pathname === "/historia"){
+      history.pushState({}, "", "/");
+    }
   };
+
+  window.addEventListener("popstate", function(){
+    if(location.pathname === "/historia"){
+      document.getElementById("historia").classList.add("aberta");
+      document.body.style.overflow = "hidden";
+    } else {
+      document.getElementById("historia").classList.remove("aberta");
+      document.body.style.overflow = "";
+    }
+  });
+
+  // Abre a seção História automaticamente se a página foi acessada direto por /historia
+  if(location.pathname === "/historia"){
+    window.abrirHistoria();
+  }
 
   window.irParaContato = function(nome, tipo, slug){
     rastrear("tenho_interesse", { lote: nome, tipo: tipo });
