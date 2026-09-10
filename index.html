@@ -1100,9 +1100,10 @@
   // Converte o texto de um cabeçalho da planilha de Compradores no nome de campo padrão.
   function cabecalhoPadraoComprador(header){
     const h = normaliza(header);
-    if(h.startsWith("comprador") || h.startsWith("nome")) return "nome";
+    if(h.startsWith("comprador") || h.startsWith("nome") || h.startsWith("cliente")) return "nome";
     if(h.startsWith("cidade")) return "cidade";
     if(h.startsWith("animal") || h.startsWith("lote")) return "animal";
+    if(h.startsWith("haras") || h.startsWith("fazenda")) return "haras";
     if(h.startsWith("depoim")) return "depoimento";
     if(h.startsWith("foto")) return "foto";
     if(h.startsWith("data")) return "data";
@@ -1121,6 +1122,7 @@
           <span><b>Comprador:</b> ${item.nome || ""}</span>
           <span><b>Cidade/Estado:</b> ${item.cidade || ""}</span>
           <span><b>Lote:</b> ${item.animal || ""}</span>
+          <span><b>Haras/Fazenda:</b> ${item.haras || ""}</span>
           <span><b>Depoimento:</b> ${item.depoimento ? `"${item.depoimento}"` : ""}</span>
           <span><b>Fotos:</b></span>
         </div>
@@ -1155,6 +1157,7 @@
             nome: l.nome,
             cidade: l.cidade,
             animal: l.animal,
+            haras: l.haras,
             depoimento: l.depoimento,
             foto: l.foto,
             data: l.data
