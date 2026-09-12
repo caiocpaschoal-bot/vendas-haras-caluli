@@ -110,7 +110,7 @@ exports.handler = async function (event) {
         const titulo = `${nome} — Haras Calúli`;
         const descricao = obs || `${tipo} disponível no Haras Calúli.`;
 
-        let imagem = "https://harascaluli.com.br/og-image.jpg";
+        let imagem = "https://www.harascaluli.com.br/og-image.jpg";
         const fotosCampo = encontrado[idxFotos] || "";
         const primeiraFoto = fotosCampo.split(/[,;\s]+/).map((f) => f.trim()).filter(Boolean)[0];
         if (primeiraFoto) {
