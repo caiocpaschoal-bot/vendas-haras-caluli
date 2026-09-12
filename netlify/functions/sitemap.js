@@ -1,5 +1,5 @@
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?output=csv";
-const SITE_URL = "https://harascaluli.com.br";
+const SITE_URL = "https://www.harascaluli.com.br";
 
 function normalizaSlug(nome) {
   return String(nome || "")
