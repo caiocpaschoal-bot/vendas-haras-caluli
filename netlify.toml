@@ -18,3 +18,9 @@
   to = "/index.html"
   status = 200
   force = true
+
+[[redirects]]
+  from = "https://harascaluli.com.br/*"
+  to = "https://www.harascaluli.com.br/:splat"
+  status = 301
+  force = true
