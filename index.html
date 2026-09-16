@@ -868,9 +868,24 @@
     return { origem: "outro", embed: url, poster: null, original: url };
   }
 
+  // Escapa texto para uso seguro dentro de um atributo HTML (alt, title, aria-label)
+  // ou como texto do card — evita que aspas e sinais vindos da planilha quebrem o HTML.
+  function escAttr(txt){
+    return String(txt == null ? "" : txt)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  // Escapa texto que vira uma string JavaScript dentro de um atributo onclick.
+  function escJS(txt){
+    return escAttr(String(txt == null ? "" : txt).replace(/\\/g, "\\\\").replace(/'/g, "\\'"));
+  }
+
   function slideVideoInlineHTML(embedUrl, titulo){
     return `<div class="slide-video-inline">
-      <iframe src="${embedUrl}" title="${titulo}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+      <iframe src="${embedUrl}" title="${escAttr(titulo)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
       <button class="expandir-video" onclick="abrirLightboxVideo('${embedUrl}', event)" aria-label="Ampliar vídeo">⤢</button>
     </div>`;
   }
@@ -884,13 +899,13 @@
         }
         // Drive: come\u00e7a como capa; ao clicar, vira player no mesmo lugar
         return `
-          <div class="slide-video-capa" style="background-image:url('${v.poster}')" onclick="iniciarVideoDrive(this, '${v.embed}', '${item.nome.replace(/'/g,"")}')">
+          <div class="slide-video-capa" style="background-image:url('${v.poster}')" onclick="iniciarVideoDrive(this, '${v.embed}', '${escJS(item.nome)}')">
             <span class="play-icone">▶</span>
           </div>`;
       }
       return `<div class="slide-video-capa" onclick="window.open('${v.original}', '_blank')"><span class="play-icone">▶</span></div>`;
     }
-    return `<img src="${midia.src}" data-fallback="${midia.fallback || ""}" alt="${item.nome} — Mangalarga Marchador de Marcha Picada, Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)">`;
+    return `<img src="${midia.src}" data-fallback="${midia.fallback || ""}" alt="${escAttr(item.nome)} — Mangalarga Marchador de Marcha Picada, Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)">`;
   }
 
   function mediaHTML(item){
@@ -948,8 +963,8 @@
       ${mediaHTML(item)}
       <div class="card-body">
         <div class="card-title-row">
-          <h3>${item.nome}</h3>
-          <a class="btn-compartilhar" href="/lote/${slug}" onclick="event.preventDefault(); compartilharLote('${item.nome.replace(/'/g,"")}', '${slug}')" aria-label="Compartilhar este lote" title="Compartilhar este lote">
+          <h3>${escAttr(item.nome)}</h3>
+          <a class="btn-compartilhar" href="/lote/${slug}" onclick="event.preventDefault(); compartilharLote('${escJS(item.nome)}', '${slug}')" aria-label="Compartilhar este lote" title="Compartilhar este lote">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
           </a>
         </div>
@@ -959,10 +974,10 @@
         <div class="card-foot">
           <span class="price">${item.valor || ""}</span>
         </div>
-        <button class="btn outline" onclick="irParaContato('${item.nome.replace(/'/g,"")}', '${tipoLabel}', '${slug}')" style="margin-top:6px;justify-content:center;">
+        <button class="btn outline" onclick="irParaContato('${escJS(item.nome)}', '${escJS(tipoLabel)}', '${slug}')" style="margin-top:6px;justify-content:center;">
           Tenho interesse
         </button>
-        <button class="btn indique" onclick="indicarCliente('${item.nome.replace(/'/g,"")}', '${tipoLabel}', '${slug}')" style="margin-top:8px;justify-content:center;">
+        <button class="btn indique" onclick="indicarCliente('${escJS(item.nome)}', '${escJS(tipoLabel)}', '${slug}')" style="margin-top:8px;justify-content:center;">
           Indique e ganhe 10%
         </button>
       </div>
@@ -1123,18 +1138,17 @@
   function compradorCardHTML(item){
     const foto = (item.foto || "").trim();
     const media = foto
-      ? `<div class="card-media tem-fotos"><img src="${converterLinkFoto(foto)}" data-fallback="${converterLinkFotoFallback(foto)}" alt="${item.nome} — Cliente Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)"></div>`
+      ? `<div class="card-media tem-fotos"><img src="${converterLinkFoto(foto)}" data-fallback="${converterLinkFotoFallback(foto)}" alt="${escAttr(item.nome)} — Cliente Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)"></div>`
       : `<div class="card-media">${iconHorse}</div>`;
     return `
     <article class="card reveal">
       <div class="card-body">
         <div class="linhagem">
-          <span><b>Comprador:</b> ${item.nome || ""}</span>
-          <span><b>Cidade/Estado:</b> ${item.cidade || ""}</span>
-          <span><b>Lote:</b> ${item.animal || ""}</span>
-          <span><b>Haras/Fazenda:</b> ${item.haras || ""}</span>
-          <span><b>Depoimento:</b> ${item.depoimento ? `"${item.depoimento}"` : ""}</span>
-          <span><b>Fotos:</b></span>
+          ${item.nome ? `<span><b>Comprador:</b> ${escAttr(item.nome)}</span>` : ""}
+          ${item.cidade ? `<span><b>Cidade/Estado:</b> ${escAttr(item.cidade)}</span>` : ""}
+          ${item.animal ? `<span><b>Lote:</b> ${escAttr(item.animal)}</span>` : ""}
+          ${item.haras ? `<span><b>Haras/Fazenda:</b> ${escAttr(item.haras)}</span>` : ""}
+          ${item.depoimento ? `<span><b>Depoimento:</b> "${escAttr(item.depoimento)}"</span>` : ""}
         </div>
         ${media}
       </div>
@@ -1340,13 +1354,29 @@
     document.getElementById("lightbox-img").style.display = "";
     document.getElementById("lightbox-video-wrap").style.display = "none";
     document.getElementById("lightbox-video").src = "";
-    document.body.style.overflow = "";
+    // Se a foto foi aberta de dentro da História, o painel continua aberto:
+    // nesse caso o scroll do fundo precisa seguir travado.
+    const histAberta = document.getElementById("historia").classList.contains("aberta");
+    document.body.style.overflow = histAberta ? "hidden" : "";
   };
 
   window.alternarZoom = function(e){
     e.stopPropagation();
     e.target.classList.toggle("zoom");
   };
+
+  // Tecla Esc fecha o que estiver aberto: primeiro a foto/vídeo ampliado, depois a História
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Escape" && e.key !== "Esc") return;
+    const lb = document.getElementById("lightbox");
+    if(lb && lb.classList.contains("aberta")){ fecharLightbox(); return; }
+    const hist = document.getElementById("historia");
+    if(hist && hist.classList.contains("aberta")){ fecharHistoria(); }
+  });
+
+  // Mantém o ano do rodapé sempre atualizado sozinho
+  const anoRodape = document.getElementById("ano-atual");
+  if(anoRodape) anoRodape.textContent = new Date().getFullYear();
 
   // Formata o telefone no padrão (XX) XXXXX-XXXX enquanto a pessoa digita
   function formatarTelefone(v){
