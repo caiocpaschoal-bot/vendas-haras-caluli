@@ -186,17 +186,22 @@
     z-index:300;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
+    /* o painel cobre o cabeçalho, entao nao precisa de folga pra desviar dele */
+    padding-top:26px;
+  }
+  @media (min-width:860px){
+    #historia{padding-top:48px;}
   }
   #historia.aberta{display:block;}
   .historia-close{
     display:inline-flex;align-items:center;gap:8px;
     background:none;border:1px solid var(--couro);color:var(--couro-escuro);
     font-family:'Inter',sans-serif;font-size:0.86rem;font-weight:500;
-    padding:9px 16px;border-radius:3px;cursor:pointer;margin-bottom:32px;
+    padding:9px 16px;border-radius:3px;cursor:pointer;margin-bottom:24px;
     transition:background .2s;
   }
   .historia-close:hover{background:rgba(138,90,46,0.08);}
-  .historia-content{max-width:760px;padding-top:90px;}
+  .historia-content{max-width:760px;padding-top:0;}
   .historia-content h2{font-size:clamp(1.5rem,3vw,2rem);line-height:1.3;margin:0;}
   .historia-content h3{
     font-family:'Fraunces',serif;font-size:1.3rem;margin:40px 0 6px;color:var(--couro-escuro);
