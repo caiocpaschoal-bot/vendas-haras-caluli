@@ -157,6 +157,9 @@ exports.handler = async function (event) {
           "brand": { "@type": "Organization", "name": "Haras Calúli" },
           "category": tipo
         };
+        // O Google recusa um Product sem offers/review/aggregateRating. Quando o valor
+        // e parcelado (e nao da pra declarar um preco unico honesto), publicamos a
+        // pagina sem o bloco de produto: melhor nenhum schema do que schema invalido.
         const preco = extrairPreco(valor);
         if (preco) {
           dados.offers = {
@@ -168,7 +171,7 @@ exports.handler = async function (event) {
             "seller": { "@type": "Organization", "name": "Haras Calúli" }
           };
         }
-        const jsonLd = JSON.stringify(dados);
+        const jsonLd = preco ? JSON.stringify(dados) : null;
 
         html = html
           .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${descricaoEsc}">`)
@@ -182,7 +185,7 @@ exports.handler = async function (event) {
           .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${descricaoEsc}">`)
           .replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${imagemEsc}">`)
           .replace(/<title>[^<]*<\/title>/, `<title>${tituloEsc}</title>`)
-          .replace("</head>", `<script type="application/ld+json">${jsonLd}</script>\n</head>`);
+          .replace("</head>", jsonLd ? `<script type="application/ld+json">${jsonLd}</script>\n</head>` : "</head>");
       }
     }
   } catch (erro) {
