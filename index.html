@@ -976,11 +976,13 @@
     // O recorte de 16% existe pra esconder a barra de titulo do YouTube.
     // O player do Drive nao tem essa barra: cortar so come os controles dele.
     const inteiro = embedUrl.includes("drive.google.com") ? " inteiro" : "";
-    return `<div class="slide-video-inline${inteiro}">
+    return `<div class="slide-video-inline${inteiro}">${SELO_VIDEO}
       <iframe src="${embedUrl}" title="${escAttr(titulo)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
       <button class="expandir-video" onclick="abrirLightboxVideo('${embedUrl}', event)" aria-label="Ampliar vídeo">⤢</button>
     </div>`;
   }
+
+  const SELO_VIDEO = `<span class="selo-video">▶ Vídeo</span>`;
 
   function slideHTML(midia, item){
     if(midia.tipo === "video"){
@@ -994,9 +996,10 @@
         return `
           <div class="slide-video-capa" style="background-image:url('${v.poster}')" onclick="abrirLightboxVideo('${v.embed}', event)">
             <span class="play-icone">▶</span>
+            ${SELO_VIDEO}
           </div>`;
       }
-      return `<div class="slide-video-capa" onclick="window.open('${v.original}', '_blank')"><span class="play-icone">▶</span></div>`;
+      return `<div class="slide-video-capa" onclick="window.open('${v.original}', '_blank')"><span class="play-icone">▶</span>${SELO_VIDEO}</div>`;
     }
     return `<img src="${midia.src}" data-fallback="${midia.fallback || ""}" alt="${escAttr(item.nome)} — Mangalarga Marchador de Marcha Picada, Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)">`;
   }
@@ -1019,19 +1022,14 @@
     if(midias.length === 0){
       return `<div class="card-media">${iconHorse}</div>`;
     }
-    // Selo avisa que existe filmagem antes de a pessoa descobrir que o card desliza
-    const selo = videos.length > 0
-      ? `<span class="selo-video">▶ Vídeo</span>`
-      : "";
     if(midias.length === 1){
-      return `<div class="card-media tem-fotos">${slideHTML(midias[0], item)}${selo}</div>`;
+      return `<div class="card-media tem-fotos">${slideHTML(midias[0], item)}</div>`;
     }
     const slides = midias.map(m => slideHTML(m, item)).join("");
     const dots = midias.map((_, i) => `<button class="carousel-dot${i===0 ? " ativo" : ""}" onclick="irParaFoto(this, ${i})" aria-label="Item ${i+1}"></button>`).join("");
     return `
       <div class="card-media tem-fotos" data-idx="0">
         <div class="carousel-track">${slides}</div>
-        ${selo}
         <span class="contador-midia">1/${midias.length}</span>
         <button class="carousel-btn prev" onclick="moverCarrossel(this, -1)" aria-label="Anterior">‹</button>
         <button class="carousel-btn next" onclick="moverCarrossel(this, 1)" aria-label="Próximo">›</button>
