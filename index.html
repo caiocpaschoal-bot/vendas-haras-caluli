@@ -226,6 +226,16 @@
   /* ---------- CARDS ---------- */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:26px;}
 
+  .aviso-lista{
+    flex:1 1 100%;width:100%;
+    display:flex;flex-direction:column;align-items:center;gap:16px;
+    text-align:center;padding:40px 22px;
+    border:1px dashed var(--linha);border-radius:4px;
+  }
+  .aviso-lista p{margin:0;max-width:46ch;font-size:0.95rem;color:var(--tinta-suave);}
+  .block.dark .aviso-lista{border-color:rgba(242,233,216,0.28);}
+  .block.dark .aviso-lista p{color:rgba(242,233,216,0.78);}
+
   /* ---------- CARROSSEL (rolagem horizontal) ---------- */
   .carrossel-wrap{position:relative;}
   .grid.carrossel{
@@ -800,22 +810,39 @@
   rastrearVisualizacaoSecao("compradores", "Clientes");
 
   // ======================================================================
-  // DADOS DE EXEMPLO — usados apenas se CONFIG.sheetCsvUrl estiver vazio
-  // ou se a planilha não puder ser carregada.
+  // AVISO DE LISTA INDISPONÍVEL — mostrado quando a planilha não carrega.
+  // Nunca inventamos lotes: é melhor um convite ao WhatsApp do que um
+  // animal de exemplo parecendo estar à venda.
   // Colunas esperadas na planilha: tipo, nome, pai, mae, nascimento, valor,
-  // observacoes
+  // observacoes, fotos, videos
   // ======================================================================
-  const LOTES_EXEMPLO = [
-    {
-      tipo: "animal",
-      nome: "50% Rara do Calúli",
-      pai: "Kaio do Calúli",
-      mae: "Aurora Odília Rocha",
-      nascimento: "07/02/2026",
-      valor: "30 parcelas de R$ 1.500,00",
-      obs: "Potra filha do Campeão Brasileiro de Marcha Picada, Primeiro Prêmio Campeão dos Campeões Brasileiro e Res. Campeão Nacional. Cavalo que é filho do Seu Chico Tandy, Campeão dos Campeões Nacionais de Marcha Picada na Cantiga Chargus, Grande Campeã Nacional de Marcha Picada e uma das éguas com mais títulos nacionais da Raça. Sua mãe é filha direta do Amado Ipê, Campeão dos Campeões Nacionais de Marcha Picada em uma égua com sangue D2."
-    }
-  ];
+  function avisoListaHTML(){
+    const texto = "Olá, Haras Calúli! Gostaria de saber o que está disponível no momento.";
+    const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
+    return `<div class="aviso-lista">
+      <p>Não foi possível carregar esta lista agora. Fale com a gente pelo WhatsApp que passamos as opções disponíveis na hora.</p>
+      <a class="btn" href="${url}" target="_blank" rel="noopener" onclick="rastrear('whatsapp_lista_indisponivel')">Falar no WhatsApp</a>
+    </div>`;
+  }
+
+  function mostrarListasIndisponiveis(){
+    const grids = ["grid-animais", "grid-coberturas", "grid-embrioes", "grid-aspiracoes"];
+    grids.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = avisoListaHTML();
+      const wrap = el.closest(".carrossel-wrap");
+      if(wrap) wrap.querySelectorAll(".carrossel-arrow").forEach(b => b.style.display = "none");
+    });
+    ["count-animais", "count-coberturas", "count-embrioes", "count-aspiracoes"].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = "--";
+    });
+    ["animais", "coberturas", "embrioes", "aspiracoes"].forEach(nome => {
+      const el = document.getElementById(nome + "-count-label");
+      if(el) el.textContent = "";
+    });
+  }
 
     const iconHorse = `<img src="/assets/icon-placeholder.png" alt="Haras Calúli — Mangalarga Marchador" class="placeholder-logo">`;
 
@@ -1090,7 +1117,7 @@
 
   function carregarDados(){
     if(!CONFIG.sheetCsvUrl){
-      renderTudo(LOTES_EXEMPLO);
+      mostrarListasIndisponiveis();
       return;
     }
     Papa.parse(CONFIG.sheetCsvUrl, {
@@ -1113,15 +1140,15 @@
           }))
           .filter(l => l.nome && l.tipo);
         if(linhas.length === 0){
-          console.warn("Planilha carregada mas sem linhas válidas — usando dados de exemplo.");
-          renderTudo(LOTES_EXEMPLO);
+          console.warn("Planilha carregada mas sem linhas válidas — mostrando aviso de indisponibilidade.");
+          mostrarListasIndisponiveis();
           return;
         }
         renderTudo(linhas);
       },
       error: function(erro){
-        console.warn("Não foi possível carregar a planilha, usando dados de exemplo.", erro);
-        renderTudo(LOTES_EXEMPLO);
+        console.warn("Não foi possível carregar a planilha — mostrando aviso de indisponibilidade.", erro);
+        mostrarListasIndisponiveis();
       }
     });
   }
