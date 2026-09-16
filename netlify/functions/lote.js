@@ -69,6 +69,18 @@ function lerIndexHtml() {
   throw new Error("index.html não encontrado no pacote da function");
 }
 
+// Extrai um preco numerico do campo Valor, so quando ele for um valor unico
+// e limpo ("R$ 30.000,00"). Parcelamentos ("30 parcelas de R$ 1.500,00") nao
+// cabem no formato que o Google entende, entao ficam de fora do schema.
+function extrairPreco(valor) {
+  const texto = String(valor || "");
+  if (/parcel|\bx\b|entrada|consult|combinar/i.test(texto)) return null;
+  const achados = texto.match(/\d{1,3}(?:\.\d{3})*(?:,\d{2})?|\d+(?:,\d{2})?/g);
+  if (!achados || achados.length !== 1) return null;
+  const numero = Number(achados[0].replace(/\./g, "").replace(",", "."));
+  return Number.isFinite(numero) && numero > 0 ? numero.toFixed(2) : null;
+}
+
 exports.handler = async function (event) {
   // Pega o slug do caminho da URL (mais confiável que query string em redirects do Netlify).
   // Aceita tanto /.netlify/functions/lote/algo quanto ?slug=algo (retrocompatibilidade).
@@ -93,6 +105,9 @@ exports.handler = async function (event) {
       const idxTipo = achaColuna(["tipo"]);
       const idxObs = achaColuna(["observ"]);
       const idxFotos = achaColuna(["foto"]);
+      const idxValor = achaColuna(["valor"]);
+      const idxPai = achaColuna(["pai"]);
+      const idxMae = achaColuna(["mae"]);
 
       let encontrado = null;
       for (let i = 1; i < linhas.length; i++) {
@@ -107,8 +122,15 @@ exports.handler = async function (event) {
         const obsCompleta = encontrado[idxObs] || "";
         const obs = obsCompleta.length > 180 ? obsCompleta.slice(0, 177) + "..." : obsCompleta;
 
+        const pai = (encontrado[idxPai] || "").trim();
+        const mae = (encontrado[idxMae] || "").trim();
+        const valor = (encontrado[idxValor] || "").trim();
+        const filiacao = pai && mae ? ` Filho(a) de ${pai} em ${mae}.` : "";
+
         const titulo = `${nome} — Haras Calúli`;
-        const descricao = obs || `${tipo} disponível no Haras Calúli.`;
+        const descricao = obs ||
+          `${tipo || "Lote"} disponível no Haras Calúli, criação de Mangalarga Marchador de Marcha Picada em Gravatá-PE.${filiacao}`;
+        const urlLote = `https://www.harascaluli.com.br/lote/${encodeURIComponent(slug)}`;
 
         let imagem = "https://www.harascaluli.com.br/og-image.jpg";
         const fotosCampo = encontrado[idxFotos] || "";
@@ -118,24 +140,41 @@ exports.handler = async function (event) {
           if (driveId) imagem = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
         }
 
+        const urlLoteEsc = escapaHtml(urlLote);
         const tituloEsc = escapaHtml(titulo);
         const descricaoEsc = escapaHtml(descricao);
         const imagemEsc = escapaHtml(imagem);
 
         // Dados estruturados (schema.org) — ajuda o Google a entender que é
         // um anúncio de animal, com nome, foto e descrição.
-        const jsonLd = JSON.stringify({
+        const dados = {
           "@context": "https://schema.org",
           "@type": "Product",
           "name": nome,
           "description": obsCompleta || descricao,
           "image": imagem,
+          "url": urlLote,
           "brand": { "@type": "Organization", "name": "Haras Calúli" },
           "category": tipo
-        });
+        };
+        const preco = extrairPreco(valor);
+        if (preco) {
+          dados.offers = {
+            "@type": "Offer",
+            "price": preco,
+            "priceCurrency": "BRL",
+            "availability": "https://schema.org/InStock",
+            "url": urlLote,
+            "seller": { "@type": "Organization", "name": "Haras Calúli" }
+          };
+        }
+        const jsonLd = JSON.stringify(dados);
 
         html = html
           .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${descricaoEsc}">`)
+          // sem isto, cada pagina de lote se declara copia da home e o Google nao a indexa
+          .replace(/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${urlLoteEsc}">`)
+          .replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${urlLoteEsc}">`)
           .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${tituloEsc}">`)
           .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${descricaoEsc}">`)
           .replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${imagemEsc}">`)
