@@ -820,7 +820,7 @@
     const texto = "Olá, Haras Calúli! Gostaria de saber o que está disponível no momento.";
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
     return `<div class="aviso-lista">
-      <p>Não foi possível carregar esta lista agora. Fale com a gente pelo WhatsApp que passamos as opções disponíveis na hora.</p>
+      <p>Estamos atualizando a lista — Entre em contato conosco pelo WhatsApp</p>
       <a class="btn" href="${url}" target="_blank" rel="noopener" onclick="rastrear('whatsapp_lista_indisponivel')">Falar no WhatsApp</a>
     </div>`;
   }
