@@ -770,7 +770,11 @@
     // Cole aqui o link CSV publicado da sua planilha Google (veja instruções
     // que a Claude te passou no chat). Deixe como "" para usar os exemplos.
     sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?output=csv",
-    sheetCompradoresCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?gid=0&single=true&output=csv"
+    sheetCompradoresCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQS-eXSNR9uq4uqX4MNXxbG6_DrD1rm1UeV_QLLZzvots3vboTuwTBxT_E63PTEdj-yH3T-TjwBqgpo/pub?gid=0&single=true&output=csv",
+
+    // Apps Script da planilha que grava os leads na aba "Leads".
+    // Deixe "" para desligar a gravacao (o formulario continua abrindo o WhatsApp).
+    leadsUrl: "https://script.google.com/macros/s/AKfycbxjK9WbnJz9LjLOu47iKAui5aUR4NQQKhYdquIxni5S0Tr3jvOWYQKGlYO9-4jQkKK_Kg/exec"
   };
 
   // Manda um evento pro Google Analytics, se ele estiver carregado (nunca quebra o site se falhar)
@@ -780,6 +784,24 @@
         gtag("event", evento, params || {});
       }
     }catch(e){ /* nunca deixa isso quebrar o site */ }
+  }
+
+  // Grava o lead na planilha antes de abrir o WhatsApp. É "dispare e esqueça":
+  // se falhar, o contato pelo WhatsApp acontece do mesmo jeito.
+  function registrarLead(dados){
+    if(!CONFIG.leadsUrl) return;
+    try{
+      const corpo = JSON.stringify(dados);
+      const tipo = "text/plain;charset=UTF-8";
+      if(navigator.sendBeacon){
+        navigator.sendBeacon(CONFIG.leadsUrl, new Blob([corpo], { type: tipo }));
+        return;
+      }
+      fetch(CONFIG.leadsUrl, {
+        method: "POST", mode: "no-cors", keepalive: true,
+        headers: { "Content-Type": tipo }, body: corpo
+      }).catch(function(){ /* silencioso de propósito */ });
+    }catch(e){ /* nunca pode impedir o envio pelo WhatsApp */ }
   }
 
   // Trata cada seção como uma "página virtual" no Analytics, disparando
@@ -1436,6 +1458,10 @@
     const texto = `Olá, Haras Calúli! Meu nome é ${nome} (tel: ${tel}). Interesse: ${interesse}. ${msg}`;
     const url = `https://wa.me/${CONFIG.telefone}?text=${encodeURIComponent(texto)}`;
     rastrear("formulario_contato_enviado", { interesse: interesse });
+    registrarLead({
+      nome: nome, telefone: tel, interesse: interesse,
+      mensagem: msg, origem: "formulario-contato"
+    });
     status.textContent = "Abrindo WhatsApp...";
     window.open(url, "_blank");
   });
