@@ -342,7 +342,10 @@
   }
   .expandir-video:hover{background:rgba(15,10,7,0.85);}
   .lightbox-video-wrap{
-    display:none;width:100%;max-width:1100px;aspect-ratio:16/9;
+    /* altura generosa em vez de 16/9 fixo: videos filmados em pe (celular)
+       ficavam espremidos numa faixa estreita no meio da moldura deitada.
+       O player centraliza sozinho, entao video deitado continua certo. */
+    display:none;width:100%;max-width:1100px;height:86vh;max-height:860px;
     position:relative;overflow:hidden;
   }
   .lightbox-video-wrap iframe{
@@ -968,9 +971,10 @@
         if(v.origem === "youtube"){
           return slideVideoInlineHTML(v.embed, item.nome);
         }
-        // Drive: come\u00e7a como capa; ao clicar, vira player no mesmo lugar
+        // Drive: capa com play que abre direto na tela ampliada. Dentro do card
+        // (240px de altura) um video em pe fica minusculo; ampliado, cabe inteiro.
         return `
-          <div class="slide-video-capa" style="background-image:url('${v.poster}')" onclick="iniciarVideoDrive(this, '${v.embed}', '${escJS(item.nome)}')">
+          <div class="slide-video-capa" style="background-image:url('${v.poster}')" onclick="abrirLightboxVideo('${v.embed}', event)">
             <span class="play-icone">▶</span>
           </div>`;
       }
@@ -1396,10 +1400,6 @@
     img.style.objectFit = "contain";
     img.style.padding = "24%";
     img.style.cursor = "default";
-  };
-
-  window.iniciarVideoDrive = function(el, embedUrl, titulo){
-    el.outerHTML = slideVideoInlineHTML(embedUrl, titulo);
   };
 
   window.abrirLightbox = function(src, e){
