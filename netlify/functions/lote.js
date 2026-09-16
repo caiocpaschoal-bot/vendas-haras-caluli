@@ -69,18 +69,6 @@ function lerIndexHtml() {
   throw new Error("index.html não encontrado no pacote da function");
 }
 
-// Extrai um preco numerico do campo Valor, so quando ele for um valor unico
-// e limpo ("R$ 30.000,00"). Parcelamentos ("30 parcelas de R$ 1.500,00") nao
-// cabem no formato que o Google entende, entao ficam de fora do schema.
-function extrairPreco(valor) {
-  const texto = String(valor || "");
-  if (/parcel|\bx\b|entrada|consult|combinar/i.test(texto)) return null;
-  const achados = texto.match(/\d{1,3}(?:\.\d{3})*(?:,\d{2})?|\d+(?:,\d{2})?/g);
-  if (!achados || achados.length !== 1) return null;
-  const numero = Number(achados[0].replace(/\./g, "").replace(",", "."));
-  return Number.isFinite(numero) && numero > 0 ? numero.toFixed(2) : null;
-}
-
 exports.handler = async function (event) {
   // Pega o slug do caminho da URL (mais confiável que query string em redirects do Netlify).
   // Aceita tanto /.netlify/functions/lote/algo quanto ?slug=algo (retrocompatibilidade).
@@ -105,7 +93,6 @@ exports.handler = async function (event) {
       const idxTipo = achaColuna(["tipo"]);
       const idxObs = achaColuna(["observ"]);
       const idxFotos = achaColuna(["foto"]);
-      const idxValor = achaColuna(["valor"]);
       const idxPai = achaColuna(["pai"]);
       const idxMae = achaColuna(["mae"]);
 
@@ -124,7 +111,6 @@ exports.handler = async function (event) {
 
         const pai = (encontrado[idxPai] || "").trim();
         const mae = (encontrado[idxMae] || "").trim();
-        const valor = (encontrado[idxValor] || "").trim();
         const filiacao = pai && mae ? ` Filho(a) de ${pai} em ${mae}.` : "";
 
         const titulo = `${nome} — Haras Calúli`;
@@ -157,21 +143,10 @@ exports.handler = async function (event) {
           "brand": { "@type": "Organization", "name": "Haras Calúli" },
           "category": tipo
         };
-        // O Google recusa um Product sem offers/review/aggregateRating. Quando o valor
-        // e parcelado (e nao da pra declarar um preco unico honesto), publicamos a
-        // pagina sem o bloco de produto: melhor nenhum schema do que schema invalido.
-        const preco = extrairPreco(valor);
-        if (preco) {
-          dados.offers = {
-            "@type": "Offer",
-            "price": preco,
-            "priceCurrency": "BRL",
-            "availability": "https://schema.org/InStock",
-            "url": urlLote,
-            "seller": { "@type": "Organization", "name": "Haras Calúli" }
-          };
-        }
-        const jsonLd = preco ? JSON.stringify(dados) : null;
+        // Sem schema de Product de proposito: o preco dos lotes e sempre parcelado,
+        // e o formato do Google so aceita um valor unico visivel na pagina. Sem preco,
+        // um Product seria recusado como item invalido. A pagina segue indexavel com
+        // titulo, descricao, imagem e canonical proprios.
 
         html = html
           .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${descricaoEsc}">`)
@@ -184,8 +159,7 @@ exports.handler = async function (event) {
           .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${tituloEsc}">`)
           .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${descricaoEsc}">`)
           .replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${imagemEsc}">`)
-          .replace(/<title>[^<]*<\/title>/, `<title>${tituloEsc}</title>`)
-          .replace("</head>", jsonLd ? `<script type="application/ld+json">${jsonLd}</script>\n</head>` : "</head>");
+          .replace(/<title>[^<]*<\/title>/, `<title>${tituloEsc}</title>`);
       }
     }
   } catch (erro) {
