@@ -348,6 +348,14 @@
     position:absolute;top:-16%;left:0;width:100%;height:132%;border:none;display:block;
   }
 
+  .card-media.logo-cliente{height:190px;padding:18px;}
+  .card-media.logo-cliente img{cursor:zoom-in;}
+  .depoimento-cliente{
+    margin:2px 0 0;font-size:0.92rem;line-height:1.55;font-style:italic;
+    color:var(--tinta-suave);
+  }
+  .block.dark .depoimento-cliente{color:rgba(242,233,216,0.78);}
+
   /* ---------- LIGHTBOX (foto ampliada com zoom) ---------- */
   .lightbox{
     display:none;position:fixed;inset:0;z-index:500;
@@ -1193,22 +1201,30 @@
     return h;
   }
 
+  // Tira aspas que já venham escritas na planilha, pra não dobrar com as nossas
+  function limparAspas(txt){
+    return String(txt == null ? "" : txt).trim().replace(/^["'“”]+|["'“”]+$/g, "").trim();
+  }
+
   function compradorCardHTML(item){
     const foto = (item.foto || "").trim();
+    // A foto vem no topo do card, como nos lotes: assim todas as logos ficam
+    // na mesma altura, independente do tamanho do texto de cada cliente.
     const media = foto
-      ? `<div class="card-media tem-fotos"><img src="${converterLinkFoto(foto)}" data-fallback="${converterLinkFotoFallback(foto)}" alt="${escAttr(item.nome)} — Cliente Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)"></div>`
+      ? `<div class="card-media tem-fotos logo-cliente"><img src="${converterLinkFoto(foto)}" data-fallback="${converterLinkFotoFallback(foto)}" alt="${escAttr(item.nome)} — Cliente Haras Calúli" loading="lazy" onclick="abrirLightbox(this.src, event)" onerror="tratarErroFoto(this)"></div>`
       : `<div class="card-media">${iconHorse}</div>`;
+    const depoimento = limparAspas(item.depoimento);
     return `
     <article class="card reveal">
+      ${media}
       <div class="card-body">
         <div class="linhagem">
           ${item.nome ? `<span><b>Comprador:</b> ${escAttr(item.nome)}</span>` : ""}
           ${item.cidade ? `<span><b>Cidade/Estado:</b> ${escAttr(item.cidade)}</span>` : ""}
           ${item.animal ? `<span><b>Lote:</b> ${escAttr(item.animal)}</span>` : ""}
           ${item.haras ? `<span><b>Haras/Fazenda:</b> ${escAttr(item.haras)}</span>` : ""}
-          ${item.depoimento ? `<span><b>Depoimento:</b> "${escAttr(item.depoimento)}"</span>` : ""}
         </div>
-        ${media}
+        ${depoimento ? `<p class="depoimento-cliente">“${escAttr(depoimento)}”</p>` : ""}
       </div>
     </article>`;
   }
