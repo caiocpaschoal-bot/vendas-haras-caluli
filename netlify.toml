@@ -1,6 +1,34 @@
 [functions]
   included_files = ["index.html"]
 
+# ---------------------------------------------------------------------------
+# REDIRECTS DE DOMINIO — precisam vir ANTES das regras de caminho abaixo.
+# O Netlify avalia na ordem: se "/lote/*" viesse primeiro, uma visita a
+# vendasharascaluli.com.br/lote/x seria servida ali mesmo, sem redirecionar.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "https://vendasharascaluli.com.br/*"
+  to = "https://www.harascaluli.com.br/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.vendasharascaluli.com.br/*"
+  to = "https://www.harascaluli.com.br/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://harascaluli.com.br/*"
+  to = "https://www.harascaluli.com.br/:splat"
+  status = 301
+  force = true
+
+# ---------------------------------------------------------------------------
+# REGRAS DE CAMINHO
+# ---------------------------------------------------------------------------
+
 [[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
@@ -17,10 +45,4 @@
   from = "/historia"
   to = "/index.html"
   status = 200
-  force = true
-
-[[redirects]]
-  from = "https://harascaluli.com.br/*"
-  to = "https://www.harascaluli.com.br/:splat"
-  status = 301
   force = true
