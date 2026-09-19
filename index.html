@@ -253,7 +253,13 @@
   .grid.carrossel::-webkit-scrollbar{height:6px;}
   .grid.carrossel::-webkit-scrollbar-thumb{background:var(--dourado);border-radius:3px;}
   .grid.carrossel::-webkit-scrollbar-track{background:transparent;}
-  .grid.carrossel .card{flex:0 0 80%;max-width:340px;scroll-snap-align:start;}
+  .grid.carrossel .card{flex:0 0 87%;max-width:none;scroll-snap-align:start;}
+  @media (max-width:639px){
+    /* margem lateral menor no celular: sobra largura pro card sem perder a
+       espiada do proximo lote, que e o que convida a arrastar */
+    section.block{padding-left:16px;padding-right:16px;}
+    .wrap{padding:0 16px;}
+  }
   @media (min-width:640px){
     .grid.carrossel .card{flex:0 0 46%;max-width:360px;}
   }
