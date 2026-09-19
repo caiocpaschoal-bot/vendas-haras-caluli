@@ -259,6 +259,9 @@
        espiada do proximo lote, que e o que convida a arrastar */
     section.block{padding-left:16px;padding-right:16px;}
     .wrap{padding:0 16px;}
+    /* contagem abaixo do titulo: lado a lado ela briga por espaco e desalinha */
+    .section-head{flex-direction:column;align-items:flex-start;gap:8px;}
+    .section-head .count{margin:0;}
   }
   @media (min-width:640px){
     .grid.carrossel .card{flex:0 0 46%;max-width:360px;}
