@@ -1122,7 +1122,7 @@
     // reveal on scroll (reaplicado a cada render)
     const observer = new IntersectionObserver((entries)=>{
       entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); observer.unobserve(e.target); } });
-    }, {threshold:0.12});
+    }, {threshold:0, rootMargin:"0px 80px 0px 80px"});
     document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 
     abrirLoteDaURL();
@@ -1273,7 +1273,7 @@
 
     const observer = new IntersectionObserver((entries)=>{
       entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); observer.unobserve(e.target); } });
-    }, {threshold:0.12});
+    }, {threshold:0, rootMargin:"0px 80px 0px 80px"});
     document.querySelectorAll("#grid-compradores .reveal").forEach(el => observer.observe(el));
   }
 
