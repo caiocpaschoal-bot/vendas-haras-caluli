@@ -1053,14 +1053,20 @@
       </div>`;
   }
 
-  // Gera um identificador curto e limpo a partir do nome do lote, para usar na URL
+  // Gera um identificador curto e limpo a partir do nome do lote, para usar na URL.
+  // O texto entre parênteses FAZ parte do slug — é ele que diferencia lotes com o
+  // mesmo nome base, ex.: "Hera do Calúli (Mãe do Líder...)" x "Hera do Calúli (Embrião irmão...)".
   function gerarSlug(nome){
     return String(nome || "")
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
-      .replace(/\([^)]*\)/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-+|-+$)/g, "");
+  }
+
+  // Formato antigo (ignorava os parênteses) — usado só para links já compartilhados continuarem abrindo
+  function gerarSlugAntigo(nome){
+    return gerarSlug(String(nome || "").replace(/\([^)]*\)/g, ""));
   }
 
   function cardHTML(item, tipoLabel){
@@ -1072,7 +1078,7 @@
           ${item.nascimento ? `<span><b>Nascimento</b>${item.nascimento}</span>` : ""}
         </div>` : "";
     return `
-    <article class="card reveal" id="lote-${slug}">
+    <article class="card reveal" id="lote-${slug}" data-slug-antigo="${gerarSlugAntigo(item.nome)}">
       ${mediaHTML(item)}
       <div class="card-body">
         <div class="card-title-row">
@@ -1168,7 +1174,8 @@
     const slug = slugDaURL();
     if(!slug) return;
     setTimeout(() => {
-      const el = document.getElementById("lote-" + slug);
+      const el = document.getElementById("lote-" + slug)
+        || document.querySelector(`[data-slug-antigo="${CSS.escape(slug)}"]`);
       if(!el) return;
       const carrossel = el.closest(".grid.carrossel");
       if(carrossel){

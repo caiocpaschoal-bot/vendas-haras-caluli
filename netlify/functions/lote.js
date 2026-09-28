@@ -7,9 +7,13 @@ function normalizaSlug(nome) {
   return String(nome || "")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/\([^)]*\)/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-+|-+$)/g, "");
+}
+
+// Formato antigo (ignorava parênteses) — só para links já compartilhados continuarem funcionando
+function normalizaSlugAntigo(nome) {
+  return normalizaSlug(String(nome || "").replace(/\([^)]*\)/g, ""));
 }
 
 function normalizaCabecalho(h) {
@@ -101,6 +105,13 @@ exports.handler = async function (event) {
         const linha = linhas[i];
         if (!linha[idxNome]) continue;
         if (normalizaSlug(linha[idxNome]) === slug) { encontrado = linha; break; }
+      }
+      if (!encontrado) {
+        for (let i = 1; i < linhas.length; i++) {
+          const linha = linhas[i];
+          if (!linha[idxNome]) continue;
+          if (normalizaSlugAntigo(linha[idxNome]) === slug) { encontrado = linha; break; }
+        }
       }
 
       if (encontrado) {
