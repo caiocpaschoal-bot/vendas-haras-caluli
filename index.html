@@ -144,6 +144,20 @@
   .hero p.lede{
     font-size:1.08rem;color:rgba(242,233,216,0.86);max-width:52ch;margin:0 0 40px;
   }
+  .hero-prova{
+    display:flex;align-items:center;gap:14px;max-width:460px;
+    margin:-12px 0 0;padding:12px 16px;border-radius:6px;
+    border:1px solid rgba(183,154,46,0.55);background:rgba(149,122,15,0.14);
+    color:var(--areia);text-decoration:none;transition:background .2s;
+  }
+  .hero-prova[hidden]{display:none;}
+  .hero-prova:hover{background:rgba(149,122,15,0.24);}
+  .hero-prova:focus-visible{outline:2px solid var(--dourado);outline-offset:3px;}
+  .hero-prova-num{font-family:'Fraunces',serif;font-weight:600;font-size:2rem;line-height:1;color:var(--dourado-claro);}
+  .hero-prova-txt{flex:1;display:flex;flex-direction:column;gap:2px;}
+  .hero-prova-txt b{font-weight:500;font-size:0.92rem;}
+  .hero-prova-txt span{font-size:0.82rem;color:rgba(242,233,216,0.75);}
+  .hero-prova-ver{font-size:0.82rem;font-weight:500;color:var(--dourado-claro);white-space:nowrap;}
   .hero-index{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
     margin-top:36px;
@@ -591,6 +605,11 @@
     <h1>Haras Calúli — Criação de Mangalarga Marchador de Marcha Picada</h1>
     <p class="hero-intro">Há mais de 20 anos, o Haras Calúli escreve sua história entre os grandes nomes da Marcha Picada, unindo tradição, genética consagrada e resultados nas principais pistas do Brasil.</p>
     <p class="lede">Uma criação movida pela excelência, formando gerações de campeões e preservando um legado que se renova a cada nascimento.</p>
+    <a class="hero-prova" id="hero-prova" href="#compradores" hidden onclick="rastrear('clique_faixa_clientes')">
+      <span class="hero-prova-num" id="hero-prova-num"></span>
+      <span class="hero-prova-txt"><b>clientes</b><span id="hero-prova-estados"></span></span>
+      <span class="hero-prova-ver">Ver clientes →</span>
+    </a>
     <div class="hero-index">
       <a href="#animais" onclick="rastrear('clique_atalho_categoria', {categoria: 'animais'})"><span>Animais à Venda</span><span class="n" id="count-animais">00</span></a>
       <a href="#coberturas" onclick="rastrear('clique_atalho_categoria', {categoria: 'coberturas'})"><span>Coberturas</span><span class="n" id="count-coberturas">00</span></a>
@@ -1283,9 +1302,36 @@
     </article>`;
   }
 
+  // Faixa de prova social no topo: soma os clientes (linha "19 Haras" conta 19)
+  // e lista os estados (siglas em maiúsculas na coluna Cidade), tudo vindo da planilha.
+  const UFS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+  function atualizarFaixaClientes(lista){
+    try{
+      let total = 0;
+      const estados = new Set();
+      lista.forEach(c => {
+        const m = String(c.nome || "").match(/^\s*(\d+)\s/);
+        total += m ? parseInt(m[1], 10) : 1;
+        String(c.cidade || "").split(/[^A-Za-zÀ-ÿ]+/).forEach(t => {
+          if(UFS.includes(t)) estados.add(t);
+        });
+      });
+      if(total === 0) return;
+      const lst = [...estados].sort();
+      let txt = "";
+      if(lst.length > 6) txt = `Em ${lst.length} estados`;
+      else if(lst.length > 1) txt = `Em ${lst.slice(0,-1).join(", ")} e ${lst[lst.length-1]}`;
+      else if(lst.length === 1) txt = `Em ${lst[0]}`;
+      document.getElementById("hero-prova-num").textContent = total;
+      document.getElementById("hero-prova-estados").textContent = txt;
+      document.getElementById("hero-prova").hidden = false;
+    }catch(e){ /* se algo falhar, a faixa simplesmente não aparece */ }
+  }
+
   function renderCompradores(lista){
     document.getElementById("grid-compradores").innerHTML = lista.map(compradorCardHTML).join("");
     document.getElementById("compradores-count-label").textContent = lista.length + " cliente(s) satisfeito(s)";
+    atualizarFaixaClientes(lista);
 
     const observer = new IntersectionObserver((entries)=>{
       entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); observer.unobserve(e.target); } });
